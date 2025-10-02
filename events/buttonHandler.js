@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Events, EmbedBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle } = require('discord.js');
 const config = require('../config');
 const LanguageManager = require('../src/LanguageManager');
 const MusicPlayer = require('../src/MusicPlayer');
@@ -23,7 +23,12 @@ module.exports = {
             return await languageCommand.handleLanguageButton(interaction);
         }
 
-        // Check if user is in a voice channel
+        // Help refresh button (doesn't require voice channel)
+        if (interaction.customId === 'help_refresh') {
+            return await this.handleHelpRefresh(interaction);
+        }
+
+        // Check if user is in a voice channel (for music controls)
         if (!member.voice.channel) {
             return await interaction.reply({
                 content: await LanguageManager.getTranslation(guild?.id, 'buttonhandler.voice_channel_required'),
@@ -84,10 +89,6 @@ module.exports = {
 
                 case 'music_volume':
                     await this.handleVolumeModal(interaction, player, requesterId);
-                    break;
-
-                case 'help_refresh':
-                    await this.handleHelpRefresh(interaction);
                     break;
 
                 default:
@@ -493,23 +494,186 @@ module.exports = {
 
     async handleHelpRefresh(interaction) {
         try {
+            // Defer the interaction to show loading state
+            await interaction.deferUpdate();
+
             // Clear language cache to ensure fresh language data
             await LanguageManager.refreshServerLanguage(interaction.guild.id);
 
-            await interaction.reply({
-                content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.refreshing_help'),
-                flags: [1 << 6]
+            // Get help command and recreate the embed with fresh data
+            const guildId = interaction.guild.id;
+            const client = interaction.client;
+
+            // Get translations
+            const t = {
+                title: await LanguageManager.getTranslation(guildId, 'commands.help.title'),
+                description: await LanguageManager.getTranslation(guildId, 'commands.help.main_description'),
+                commandsTitle: await LanguageManager.getTranslation(guildId, 'commands.help.commands_title'),
+                commandsList: await LanguageManager.getTranslation(guildId, 'commands.help.commands_list'),
+                buttonControlsTitle: await LanguageManager.getTranslation(guildId, 'commands.help.button_controls_title'),
+                buttonControlsList: await LanguageManager.getTranslation(guildId, 'commands.help.button_controls_list'),
+                platformsTitle: await LanguageManager.getTranslation(guildId, 'commands.help.platforms_title'),
+                platformsList: await LanguageManager.getTranslation(guildId, 'commands.help.platforms_list'),
+                featuresTitle: await LanguageManager.getTranslation(guildId, 'commands.help.features_title'),
+                featuresList: await LanguageManager.getTranslation(guildId, 'commands.help.features_list'),
+                howtoTitle: await LanguageManager.getTranslation(guildId, 'commands.help.howto_title'),
+                howtoList: await LanguageManager.getTranslation(guildId, 'commands.help.howto_list'),
+                statisticsTitle: await LanguageManager.getTranslation(guildId, 'commands.help.statistics_title'),
+                linksTitle: await LanguageManager.getTranslation(guildId, 'commands.help.links_title'),
+                footerText: await LanguageManager.getTranslation(guildId, 'commands.help.footer_text'),
+                buttonWebsite: await LanguageManager.getTranslation(guildId, 'commands.help.button_website'),
+                buttonSupport: await LanguageManager.getTranslation(guildId, 'commands.help.button_support'),
+                buttonRefresh: await LanguageManager.getTranslation(guildId, 'commands.help.button_refresh')
+            };
+
+            const embed = new EmbedBuilder()
+                .setTitle(t.title)
+                .setDescription(t.description)
+                .setColor(config.bot.embedColor)
+                .setThumbnail(client.user.displayAvatarURL())
+                .setTimestamp();
+
+            // Commands
+            embed.addFields({
+                name: t.commandsTitle,
+                value: Array.isArray(t.commandsList) ? t.commandsList.join('\n') : t.commandsList,
+                inline: false
             });
 
-            // Simulate refresh - just re-run the help command
+            // Button Controls
+            embed.addFields({
+                name: t.buttonControlsTitle,
+                value: Array.isArray(t.buttonControlsList) ? t.buttonControlsList.join('\n') : t.buttonControlsList,
+                inline: false
+            });
+
+            // Supported Platforms
+            embed.addFields({
+                name: t.platformsTitle,
+                value: Array.isArray(t.platformsList) ? t.platformsList.join('\n') : t.platformsList,
+                inline: false
+            });
+
+            // Features
+            embed.addFields({
+                name: t.featuresTitle,
+                value: Array.isArray(t.featuresList) ? t.featuresList.join('\n') : t.featuresList,
+                inline: false
+            });
+
+            // How to Use
+            embed.addFields({
+                name: t.howtoTitle,
+                value: Array.isArray(t.howtoList) ? t.howtoList.join('\n') : t.howtoList,
+                inline: false
+            });
+
+            // Statistics - Fetch from all shards if sharding is enabled
+            let guilds, users, activeServers;
+
+            if (client.shard) {
+                // Sharding is enabled - fetch from all shards
+                try {
+                    // Fetch guild counts from all shards
+                    const guildCounts = await client.shard.fetchClientValues('guilds.cache.size');
+                    guilds = guildCounts.reduce((acc, count) => acc + count, 0);
+
+                    // Fetch member counts from all shards
+                    const memberCounts = await client.shard.broadcastEval(c => 
+                        c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)
+                    );
+                    users = memberCounts.reduce((acc, count) => acc + count, 0);
+
+                    // Fetch active players from all shards
+                    const activePlayers = await client.shard.broadcastEval(c => c.players.size);
+                    activeServers = activePlayers.reduce((acc, count) => acc + count, 0);
+                } catch (error) {
+                    console.error('Error fetching shard statistics:', error);
+                    // Fallback to local shard data
+                    guilds = client.guilds.cache.size;
+                    users = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+                    activeServers = client.players.size;
+                }
+            } else {
+                // No sharding - use local data
+                guilds = client.guilds.cache.size;
+                users = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+                activeServers = client.players.size;
+            }
+
             const helpCommand = require('../commands/help.js');
-            await helpCommand.execute(interaction, interaction.client);
+            const statsServers = await LanguageManager.getTranslation(guildId, 'commands.help.stats_servers', { count: guilds });
+            const statsUsers = await LanguageManager.getTranslation(guildId, 'commands.help.stats_users', { count: users.toLocaleString() });
+            const statsActive = await LanguageManager.getTranslation(guildId, 'commands.help.stats_active', { count: activeServers });
+            const statsUptime = await LanguageManager.getTranslation(guildId, 'commands.help.stats_uptime', { time: helpCommand.formatUptime(process.uptime()) });
+
+            embed.addFields({
+                name: t.statisticsTitle,
+                value: [
+                    statsServers,
+                    statsUsers,
+                    statsActive,
+                    statsUptime
+                ].join('\n'),
+                inline: true
+            });
+
+            // Links
+            embed.addFields({
+                name: t.linksTitle,
+                value: [
+                    `[🌐 Website](${config.bot.website})`,
+                    `[💬 Support Server](${config.bot.supportServer})`,
+                    `[📄 Invite Bot](${config.bot.invite})`
+                ].join('\n'),
+                inline: true
+            });
+
+            embed.setFooter({
+                text: `${client.user.username} • ${t.footerText}`,
+                iconURL: client.user.displayAvatarURL()
+            });
+
+            // Buttons - keep the same components
+            const row = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setLabel(t.buttonWebsite)
+                        .setURL(config.bot.website)
+                        .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                        .setLabel(t.buttonSupport)
+                        .setURL(config.bot.supportServer)
+                        .setStyle(ButtonStyle.Link),
+                    new ButtonBuilder()
+                        .setCustomId('help_refresh')
+                        .setLabel(t.buttonRefresh)
+                        .setEmoji('🔄')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+
+            await interaction.editReply({
+                embeds: [embed],
+                components: [row]
+            });
 
         } catch (error) {
-            await interaction.reply({
-                content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.refresh_error'),
-                flags: [1 << 6]
-            });
+            console.error('Error refreshing help:', error);
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({
+                        content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.refresh_error'),
+                        flags: [1 << 6]
+                    });
+                } else {
+                    await interaction.followUp({
+                        content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.refresh_error'),
+                        flags: [1 << 6]
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to send error message:', err);
+            }
         }
     },
 

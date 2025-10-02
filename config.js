@@ -50,6 +50,33 @@ module.exports = {
         filter: 'audioonly',
         quality: 'highestaudio',
         highWaterMark: 1 << 25,
+    },
+
+    // Sharding Settings (for bots in 1000+ servers)
+    sharding: {
+        // Set to 'auto' to let Discord.js calculate optimal shard count
+        // Or set a specific number (e.g., 2, 4, 8, etc.)
+        // Formula: Math.ceil(total_guilds / 1000) = recommended shards
+        totalShards: process.env.TOTAL_SHARDS || 'auto',
+        
+        // Shard list to spawn (default: 'auto' spawns all)
+        // Example: [0, 1, 2] to spawn specific shards
+        shardList: process.env.SHARD_LIST || 'auto',
+        
+        // Sharding mode: 'process' (recommended) or 'worker'
+        // 'process' = each shard runs in separate Node.js process (more stable)
+        // 'worker' = each shard runs in worker thread (less memory, experimental)
+        mode: process.env.SHARD_MODE || 'process',
+        
+        // Auto-respawn crashed shards (recommended: true)
+        respawn: process.env.SHARD_RESPAWN !== 'false',
+        
+        // Delay between spawning each shard (milliseconds)
+        // Discord recommends 5000-5500ms to avoid rate limits
+        spawnDelay: parseInt(process.env.SHARD_SPAWN_DELAY) || 5500,
+        
+        // Timeout for shard ready event (milliseconds)
+        spawnTimeout: parseInt(process.env.SHARD_SPAWN_TIMEOUT) || 30000,
     }
 
 };

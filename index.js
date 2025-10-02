@@ -17,6 +17,8 @@ setTimeout(() => {
             GatewayIntentBits.GuildVoiceStates,
             GatewayIntentBits.GuildMembers,
         ]
+        // ShardingManager automatically sets shard ID and count via environment variables
+        // No need to specify shards/shardCount here - they are auto-injected
     });
 
     // Collections for commands and music players
@@ -89,8 +91,26 @@ setTimeout(() => {
 
     // Basic ready event
     client.once(Events.ClientReady, async () => {
-        console.log(chalk.green(`✅ ${client.user.tag} is online and ready!`));
-        console.log(chalk.cyan(`🎵 Music bot serving ${client.guilds.cache.size} servers!`));
+        console.log(chalk.green(`✅ [SHARD ${client.shard?.ids[0] ?? 0}] ${client.user.tag} is online and ready!`));
+        console.log(chalk.cyan(`🎵 [SHARD ${client.shard?.ids[0] ?? 0}] Music bot serving ${client.guilds.cache.size} servers on this shard!`));
+        
+        // Log total guild count across all shards (only if running with sharding)
+        // Wait a bit to ensure all shards are ready before fetching
+        if (client.shard) {
+            setTimeout(() => {
+                client.shard.fetchClientValues('guilds.cache.size')
+                    .then(results => {
+                        const totalGuilds = results.reduce((acc, guildCount) => acc + guildCount, 0);
+                        console.log(chalk.magenta(`🌐 [SHARD ${client.shard.ids[0]}] Total servers across all shards: ${totalGuilds}`));
+                    })
+                    .catch(err => {
+                        // Silently fail if shards are still spawning
+                        if (!err.message.includes('still being spawned')) {
+                            console.error(chalk.red('Error fetching total guild count:'), err);
+                        }
+                    });
+            }, 10000); // Wait 10 seconds for other shards to be ready
+        }
 
         // Set bot activity
         setInterval(() => client.user.setActivity({ name: `${config.bot.status}`, type: ActivityType.Listening }), 10000);

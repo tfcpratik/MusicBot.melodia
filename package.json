@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node index.js",
+    "shard": "node shard.js",
     "test": "node --check index.js"
   },
   "keywords": [

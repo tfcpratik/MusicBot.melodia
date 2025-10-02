@@ -34,12 +34,13 @@ A next-generation Discord music bot crafted with **discord.js v14**, engineered 
 4. [Quick Start](#quick-start)
 5. [Configuration](#configuration)
 6. [Spotify API Setup](#spotify-api-setup)
-7. [Slash Commands & Controls](#slash-commands--controls)
-8. [Language Support](#language-support)
-9. [Deployment Tips](#deployment-tips)
-10. [Troubleshooting](#troubleshooting)
-11. [Privacy & Legal](#privacy--legal)
-12. [Contributing](#contributing)
+7. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
+8. [Slash Commands & Controls](#slash-commands--controls)
+9. [Language Support](#language-support)
+10. [Deployment Tips](#deployment-tips)
+11. [Troubleshooting](#troubleshooting)
+12. [Privacy & Legal](#privacy--legal)
+13. [Contributing](#contributing)
 
 ---
 
@@ -165,6 +166,133 @@ WEBSITE=https://musicmaker.vercel.app
 6. Restart the bot. The credentials are cached and refreshed automatically with the client credentials grant.
 
 Without these credentials Spotify requests fall back to zero results.
+
+---
+
+## Sharding for Large Bots (1000+ Servers)
+
+When your bot reaches **1,000+ servers**, Discord **requires** you to use sharding to distribute the load across multiple processes. MusicMaker includes a fully automated sharding system powered by Discord.js's `ShardingManager`.
+
+> 📚 **[Read the complete Sharding Guide](./SHARDING.md)** for detailed documentation, troubleshooting, and best practices.
+
+### 🎯 What is Sharding?
+
+Sharding splits your bot into multiple instances (shards), each handling a subset of servers:
+- **Shard 0** might handle servers 1-1000
+- **Shard 1** might handle servers 1001-2000
+- And so on...
+
+Discord automatically routes events to the correct shard based on server ID.
+
+### 🚀 Quick Start with Sharding
+
+#### Option 1: Interactive Launcher (Recommended)
+```powershell
+.\start.bat
+```
+Choose option **[2] Sharding Mode** when prompted.
+
+#### Option 2: Direct Sharding Launch
+```powershell
+.\start-shard.bat
+# or
+node shard.js
+```
+
+#### Option 3: Normal Mode (< 1000 servers)
+```powershell
+node index.js
+```
+
+### ⚙️ Sharding Configuration
+
+Configure sharding in `.env` or `config.js`:
+
+```dotenv
+# Sharding Settings
+TOTAL_SHARDS=auto              # 'auto' = Discord calculates optimal count
+SHARD_LIST=auto                # 'auto' = spawn all shards, or [0,1,2] for specific
+SHARD_MODE=process             # 'process' (recommended) or 'worker'
+SHARD_RESPAWN=true             # Auto-restart crashed shards
+SHARD_SPAWN_DELAY=5500         # Delay between spawning shards (ms)
+SHARD_SPAWN_TIMEOUT=30000      # Timeout for shard ready event (ms)
+```
+
+### 📊 Sharding Modes Explained
+
+| Mode | Description | Best For |
+| --- | --- | --- |
+| **process** | Each shard runs in a separate Node.js process | Production (more stable, isolated memory) |
+| **worker** | Each shard runs in a worker thread | Development (less memory, experimental) |
+
+### 🔢 How Many Shards Do I Need?
+
+Discord recommends: **1 shard per 1,000 servers**
+
+| Servers | Recommended Shards |
+| --- | --- |
+| < 1,000 | No sharding needed (use `node index.js`) |
+| 1,000 - 2,000 | 2 shards |
+| 2,000 - 3,000 | 3 shards |
+| 5,000+ | 5+ shards |
+
+The bot automatically calculates the optimal count when `TOTAL_SHARDS=auto`.
+
+### 📝 Sharding Best Practices
+
+1. **Use `auto` for production** – Let Discord.js calculate the optimal shard count
+2. **Respect spawn delays** – Discord rate-limits shard connections (5-5.5 seconds recommended)
+3. **Monitor shard health** – The shard manager logs each shard's status in real-time
+4. **Enable auto-respawn** – Crashed shards restart automatically
+5. **Use process mode** – More stable than worker threads for production
+
+### 🔍 Monitoring Shards
+
+The bot displays detailed shard information:
+
+```
+[SHARD MANAGER] Launching shard 0...
+[SHARD 0] ✅ Shard 0 is ready!
+[SHARD 0] 🎵 Music bot serving 847 servers on this shard!
+[SHARD 0] 🌐 Total servers across all shards: 1523
+
+[SHARD MANAGER] Launching shard 1...
+[SHARD 1] ✅ Shard 1 is ready!
+[SHARD 1] 🎵 Music bot serving 676 servers on this shard!
+```
+
+### 🛠️ Advanced Sharding
+
+#### Run Specific Shards
+```dotenv
+SHARD_LIST=[0,1,2]  # Only spawn shards 0, 1, and 2
+```
+
+#### Manual Shard Count
+```dotenv
+TOTAL_SHARDS=4  # Force 4 shards regardless of server count
+```
+
+#### Disable Auto-Respawn (Not Recommended)
+```dotenv
+SHARD_RESPAWN=false
+```
+
+### 🚨 Important Notes
+
+- **Sharding is mandatory at 1,000+ servers** – Discord will reject connections without it
+- **Commands work identically** – Users see no difference between sharded and non-sharded bots
+- **Database remains local** – Each shard shares the same `database/languages.json` file
+- **Voice connections are isolated** – Each shard manages its own voice connections
+
+### 🆘 Sharding Troubleshooting
+
+| Issue | Solution |
+| --- | --- |
+| "Cannot spawn more than X shards" | Discord limits shards based on server count. Use `auto` or contact Discord for limit increase. |
+| Shards keep crashing | Check memory usage and increase spawn timeout (`SHARD_SPAWN_TIMEOUT`). |
+| Commands not appearing | Wait for all shards to be ready. Global commands can take up to 1 hour to propagate. |
+| Bot shows as offline | Ensure all shards are running. Check the shard manager logs. |
 
 ---
 

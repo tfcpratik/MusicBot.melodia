@@ -213,7 +213,7 @@ class MusicEmbedManager {
      * Now Playing embed'ini oluşturur
      */
     async createNowPlayingEmbed(player, track, guildId) {
-        const nowPlayingTitle = await LanguageManager.getTranslation(guildId, 'play.now_playing');
+        const nowPlayingTitle = await LanguageManager.getTranslation(guildId, 'commands.play.now_playing');
 
         const embed = new EmbedBuilder()
             .setTitle(nowPlayingTitle)
@@ -223,7 +223,7 @@ class MusicEmbedManager {
 
         // Artist
         if (track.artist) {
-            const artistLabel = await LanguageManager.getTranslation(guildId, 'play.artist');
+            const artistLabel = await LanguageManager.getTranslation(guildId, 'commands.play.artist');
             embed.addFields({
                 name: artistLabel,
                 value: track.artist,
@@ -233,7 +233,7 @@ class MusicEmbedManager {
 
         // Duration
         if (track.duration) {
-            const durationLabel = await LanguageManager.getTranslation(guildId, 'play.duration');
+            const durationLabel = await LanguageManager.getTranslation(guildId, 'commands.play.duration');
             embed.addFields({
                 name: durationLabel,
                 value: this.formatDuration(track.duration),
@@ -243,7 +243,7 @@ class MusicEmbedManager {
 
         // Platform
         if (track.platform) {
-            const platformLabel = await LanguageManager.getTranslation(guildId, 'play.platform');
+            const platformLabel = await LanguageManager.getTranslation(guildId, 'commands.play.platform');
             embed.addFields({
                 name: platformLabel,
                 value: this.getPlatformEmoji(track.platform) + ' ' +
@@ -259,7 +259,7 @@ class MusicEmbedManager {
 
         // Queue info in footer
         if (player.queue.length > 0) {
-            const footerText = await LanguageManager.getTranslation(guildId, 'play.more_songs_in_queue', { count: player.queue.length });
+            const footerText = await LanguageManager.getTranslation(guildId, 'commands.play.more_songs_in_queue', { count: player.queue.length });
             embed.setFooter({ text: footerText });
         }
 

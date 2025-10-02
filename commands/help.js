@@ -75,10 +75,38 @@ module.exports = {
                 inline: false
             });
 
-            // Statistics
-            const guilds = client.guilds.cache.size;
-            const users = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
-            const activeServers = client.players.size;
+            // Statistics - Fetch from all shards if sharding is enabled
+            let guilds, users, activeServers;
+
+            if (client.shard) {
+                // Sharding is enabled - fetch from all shards
+                try {
+                    // Fetch guild counts from all shards
+                    const guildCounts = await client.shard.fetchClientValues('guilds.cache.size');
+                    guilds = guildCounts.reduce((acc, count) => acc + count, 0);
+
+                    // Fetch member counts from all shards
+                    const memberCounts = await client.shard.broadcastEval(c => 
+                        c.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0)
+                    );
+                    users = memberCounts.reduce((acc, count) => acc + count, 0);
+
+                    // Fetch active players from all shards
+                    const activePlayers = await client.shard.broadcastEval(c => c.players.size);
+                    activeServers = activePlayers.reduce((acc, count) => acc + count, 0);
+                } catch (error) {
+                    console.error('Error fetching shard statistics:', error);
+                    // Fallback to local shard data
+                    guilds = client.guilds.cache.size;
+                    users = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+                    activeServers = client.players.size;
+                }
+            } else {
+                // No sharding - use local data
+                guilds = client.guilds.cache.size;
+                users = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
+                activeServers = client.players.size;
+            }
 
             const statsServers = await LanguageManager.getTranslation(guildId, 'commands.help.stats_servers', { count: guilds });
             const statsUsers = await LanguageManager.getTranslation(guildId, 'commands.help.stats_users', { count: users.toLocaleString() });

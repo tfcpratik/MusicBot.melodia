@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 const { JsonDB, Config } = require('node-json-db');
 const fs = require('fs');
 const path = require('path');
@@ -10,10 +10,25 @@ const db = new JsonDB(new Config('database/languages', true, true, '/'));
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('language')
-        .setDescription('Changes server language'),
+        .setDescription('Changes server language')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction, client) {
         try {
+            // Check if user has MANAGE_GUILD permission
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                const noPermissionTitle = await LanguageManager.getTranslation(interaction.guild.id, 'commands.language.errortitle');
+                const noPermissionDesc = '❌ Bu komutu kullanmak için **Sunucuyu Yönet** yetkisine sahip olmalısın!';
+                
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle(noPermissionTitle)
+                    .setDescription(noPermissionDesc)
+                    .setColor('#ff0000')
+                    .setTimestamp();
+                
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            }
+
             const guildId = interaction.guild.id;
 
             // Get current language
@@ -103,6 +118,20 @@ module.exports = {
     // Handle button interactions
     async handleLanguageButton(interaction) {
         try {
+            // Check if user has MANAGE_GUILD permission
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                const noPermissionTitle = await LanguageManager.getTranslation(interaction.guild.id, 'commands.language.errortitle');
+                const noPermissionDesc = '❌ Bu butonu kullanmak için **Sunucuyu Yönet** yetkisine sahip olmalısın!';
+                
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle(noPermissionTitle)
+                    .setDescription(noPermissionDesc)
+                    .setColor('#ff0000')
+                    .setTimestamp();
+                
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            }
+
             const guildId = interaction.guild.id;
             const selectedLang = interaction.customId.replace('language_', '');
 

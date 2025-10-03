@@ -1,7 +1,8 @@
 <div align="center">
 
-# MusicMaker v16.0 🎶## Project Highlights
+# MusicMaker v16.0 🎶
 
+## Project Highlights
 | Capability | Details |
 | --- | --- |
 | 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
@@ -546,5 +547,6 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 

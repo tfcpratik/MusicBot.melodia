@@ -468,7 +468,6 @@ class MusicPlayer {
             if (fsSync.existsSync(filepath)) {
                 const stats = await fs.stat(filepath);
                 if (stats.size > 0) {
-                    console.log(`♻️ Using cached: ${track.title}`);
                     this.downloadedFiles.add(filepath);
                     return filepath;
                 }
@@ -476,8 +475,6 @@ class MusicPlayer {
 
             // Check if already downloading - wait for it to complete
             if (this.downloadingFiles.has(filepath)) {
-                console.log(`⏳ Waiting for download to complete: ${track.title}`);
-                
                 // Wait for the file to be downloaded (max 60 seconds)
                 for (let i = 0; i < 60; i++) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -485,7 +482,6 @@ class MusicPlayer {
                     if (fsSync.existsSync(filepath)) {
                         const stats = await fs.stat(filepath);
                         if (stats.size > 0) {
-                            console.log(`✅ Download completed (waited): ${track.title}`);
                             this.downloadedFiles.add(filepath);
                             return filepath;
                         }
@@ -498,8 +494,6 @@ class MusicPlayer {
 
             // Mark as downloading
             this.downloadingFiles.add(filepath);
-
-            console.log(`📥 Downloading: ${track.title}`);
 
             // For Spotify and SoundCloud - we need to use the YouTube URL
             // These platforms have DRM protection and can't be downloaded directly
@@ -593,8 +587,6 @@ class MusicPlayer {
                 });
             }
 
-            console.log(`✅ Downloaded: ${track.title}`);
-
             // Verify file
             const stats = await fs.stat(filepath);
             if (stats.size === 0) {
@@ -602,7 +594,6 @@ class MusicPlayer {
                 this.downloadingFiles.delete(filepath);
                 throw new Error('Downloaded file is empty');
             }
-            console.log(`📊 File size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
 
             this.downloadedFiles.add(filepath);
             this.downloadingFiles.delete(filepath); // Remove from downloading set
@@ -624,7 +615,6 @@ class MusicPlayer {
         try {
             await fs.unlink(filepath);
             this.downloadedFiles.delete(filepath);
-            console.log(`🗑️ Deleted: ${path.basename(filepath)}`);
         } catch (error) {
             if (error.code !== 'ENOENT') {
                 console.error(`❌ Failed to delete file ${filepath}:`, error.message);
@@ -773,8 +763,7 @@ class MusicPlayer {
             
             if (this.currentDownloadedFile && fsSync.existsSync(this.currentDownloadedFile)) {
                 // Reuse existing file if it's the same track
-                console.log(`♻️ Reusing cached file: ${this.currentTrack.title}`);
-                downloadedFile = this.currentDownloadedFile;
+               downloadedFile = this.currentDownloadedFile;
             } else {
                 // Check if already pre-downloaded
                 const hash = crypto.createHash('md5').update(this.currentTrack.url).digest('hex');
@@ -783,7 +772,6 @@ class MusicPlayer {
                 if (fsSync.existsSync(filepath)) {
                     const stats = fsSync.statSync(filepath);
                     if (stats.size > 0) {
-                        console.log(`⚡ Using pre-downloaded file: ${this.currentTrack.title}`);
                         downloadedFile = filepath;
                         this.downloadedFiles.add(filepath);
                         this.currentDownloadedFile = filepath;
@@ -797,8 +785,6 @@ class MusicPlayer {
 
             // If we need to download, start streaming immediately while downloading in background
             if (shouldDownload) {
-                console.log(`🎵 Streaming: ${this.currentTrack.title}`);
-                
                 // Start download in background (don't await)
                 const hash = crypto.createHash('md5').update(this.currentTrack.url).digest('hex');
                 const filepath = path.join(CACHE_DIR, `track_${hash}.opus`);
@@ -809,9 +795,6 @@ class MusicPlayer {
                 // Download in background
                 this.downloadTrack(trackToDownload, streamUrl_final, streamInfo)
                     .then(file => {
-                        if (trackToDownload && trackToDownload.title) {
-                            console.log(`✅ Background download completed: ${trackToDownload.title}`);
-                        }
                         // Only update if we're still on the same track
                         if (this.currentTrack && this.currentTrack.url === trackToDownload.url) {
                             this.currentDownloadedFile = file;
@@ -843,9 +826,6 @@ class MusicPlayer {
                             ? Readable.fromWeb(response.body) 
                             : response.body;
                     } catch (fetchError) {
-                        // If streaming fails, wait for download and use that
-                        console.log(`⚠️ Streaming failed, waiting for download: ${fetchError.message}`);
-                        
                         // Wait for download to complete
                         for (let i = 0; i < 30; i++) {
                             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -904,8 +884,6 @@ class MusicPlayer {
             
             // File playback mode (either pre-downloaded or fallback from streaming)
             if (!shouldDownload && downloadedFile) {
-                console.log(`▶️ Playing from cache: ${this.currentTrack.title}`);
-                
                 const ffmpegProcess = new prism.FFmpeg({
                     command: ffmpegPath,
                     args: [
@@ -1368,8 +1346,6 @@ class MusicPlayer {
         if (!this.autoplay || typeof this.autoplay !== 'string') return;
 
         try {
-            console.log(`🎲 Autoplay: Finding ${this.autoplay} music...`);
-
             // Genre-specific search keywords
             const genreKeywords = {
                 pop: ['pop music 2024', 'top pop songs', 'pop hits official', 'best pop music'],
@@ -1402,7 +1378,6 @@ class MusicPlayer {
             const results = await YouTube.search(randomKeyword, 15, this.guild.id);
 
             if (!results || results.length === 0) {
-                console.log('⚠️ Autoplay: No results found');
                 return;
             }
 
@@ -1440,7 +1415,6 @@ class MusicPlayer {
             });
 
             if (filteredResults.length === 0) {
-                console.log('⚠️ Autoplay: All results filtered out, retrying with different keyword');
                 // Try again with a different keyword
                 const fallbackKeyword = keywords[Math.floor(Math.random() * keywords.length)];
                 const fallbackResults = await YouTube.search(fallbackKeyword, 10, this.guild.id);
@@ -1449,7 +1423,6 @@ class MusicPlayer {
                 );
                 
                 if (fallbackFiltered.length === 0) {
-                    console.log('⚠️ Autoplay: No suitable tracks found');
                     return;
                 }
                 
@@ -1463,9 +1436,7 @@ class MusicPlayer {
 
             // Add to queue
             this.queue.push(randomTrack);
-            
-            console.log(`✅ Autoplay: Added "${randomTrack.title}" (${randomTrack.duration}s)`);
-
+           
             // Preload track
             this.preloadTrack(randomTrack).catch(err => {
                 if (err && err.message) {
@@ -1482,8 +1453,6 @@ class MusicPlayer {
             if (global.clients && global.clients.musicEmbedManager) {
                 await global.clients.musicEmbedManager.updateNowPlayingEmbed(this);
             }
-
-            console.log(`🎲 Autoplay: Now playing "${this.currentTrack.title}"`);
 
         } catch (error) {
             console.error('❌ Autoplay error:', error.message);
@@ -1528,7 +1497,6 @@ class MusicPlayer {
         if (fsSync.existsSync(filepath)) {
             const stats = fsSync.statSync(filepath);
             if (stats.size > 0) {
-                console.log(`⏭️ Already cached: ${track.title}`);
                 return; // Already downloaded
             }
         }
@@ -1537,12 +1505,10 @@ class MusicPlayer {
         if (this.preloadedStreams.has(track.url) || 
             this.preloadingQueue.includes(track.url) ||
             this.downloadingFiles.has(filepath)) {
-            console.log(`⏸️ Already downloading: ${track.title}`);
             return;
         }
 
         this.preloadingQueue.push(track.url);
-        console.log(`⬇️ Pre-downloading: ${track.title}`);
 
         try {
             let streamUrl = track.url;

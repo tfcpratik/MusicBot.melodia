@@ -119,7 +119,6 @@ class MusicEmbedManager {
 
             return { success: true, message: 'Track processed successfully' };
         } catch (error) {
-            console.error('Error processing music:', error);
             return { success: false, message: 'Error processing music' };
         }
     }

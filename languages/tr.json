@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Geçersiz seçim!",
     "processing": "İşleniyor...",
     "adding_song_desc": "**{title}** ekleniyor...",
-    "error_title": "❌ Hata"
+    "error_title": "❌ Hata",
+    "loop_mode_changed_title": "🔁 Döngü Modu Değiştirildi",
+    "loop_mode_off": "Döngü modu **kapatıldı**",
+    "loop_mode_track": "Döngü modu **şarkı tekrarı** olarak ayarlandı. Mevcut şarkı sürekli tekrarlanacak.",
+    "loop_mode_queue": "Döngü modu **sıra tekrarı** olarak ayarlandı. Sıra bitince başa dönülecek.",
+    "changed_by": "👤 Değiştiren",
+    "autoplay_disabled": "Otomatik Çalma Kapatıldı",
+    "autoplay_disabled_desc": "Otomatik müzik çalma özelliği kapatıldı.",
+    "autoplay_select_title": "Otomatik Çalma için Tarz Seçin",
+    "autoplay_select_desc": "Sıra bittiğinde hangi tarzda müzikler çalınsın?",
+    "autoplay_select_genre": "Bir müzik türü seçin...",
+    "autoplay_enabled": "Otomatik Çalma Etkinleştirildi",
+    "autoplay_enabled_desc": "Otomatik çalma **{genre}** türü için etkinleştirildi. Sıra bittiğinde otomatik olarak yeni müzikler eklenecek."
   },
   "musicmanager": {
     "playback_ended": "Müzik Bitti",
@@ -267,6 +279,34 @@
     "stop": "Durdur",
     "queue": "Sıra",
     "shuffle": "Karıştır",
-    "volume": "Ses"
+    "volume": "Ses",
+    "loop": "Döngü",
+    "loop_off": "Döngü: Kapalı",
+    "loop_track": "Döngü: Şarkı",
+    "loop_queue": "Döngü: Sıra",
+    "autoplay_off": "Otomatik Çalma: Kapalı",
+    "autoplay_on": "Otomatik Çalma: Açık"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronik",
+    "jazz": "Caz",
+    "classical": "Klasik",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Rastgele"
   }
 }

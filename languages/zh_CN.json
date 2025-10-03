@@ -252,7 +252,19 @@
     "invalid_selection": "❌ 无效的选择！",
     "processing": "处理中...",
     "adding_song_desc": "正在添加 **{title}**...",
-    "error_title": "❌ 错误"
+    "error_title": "❌ 错误",
+    "loop_mode_changed_title": "🔁 循环模式已更改",
+    "loop_mode_off": "循环模式现已**关闭**",
+    "loop_mode_track": "循环模式设置为**单曲循环**。当前歌曲将持续播放。",
+    "loop_mode_queue": "循环模式设置为**队列循环**。队列结束后将重新开始。",
+    "changed_by": "👤 更改者",
+    "autoplay_disabled": "🎲 自动播放已关闭",
+    "autoplay_disabled_desc": "自动播放功能已被关闭。",
+    "autoplay_select_title": "🎵 选择音乐类型",
+    "autoplay_select_desc": "队列结束后要播放哪种类型？",
+    "autoplay_select_genre": "请选择音乐类型...",
+    "autoplay_enabled": "🎲 自动播放已开启",
+    "autoplay_enabled_desc": "类型：**{genre}**"
   },
   "musicmanager": {
     "playback_ended": "音乐已结束",
@@ -267,6 +279,34 @@
     "stop": "停止",
     "queue": "队列",
     "shuffle": "随机播放",
-    "volume": "音量"
+    "volume": "音量",
+    "loop": "循环",
+    "loop_off": "循环: 关闭",
+    "loop_track": "循环: 单曲",
+    "loop_queue": "循环: 队列",
+    "autoplay_off": "自动播放: 关闭",
+    "autoplay_on": "自动播放: 开启"
+  },
+  "genres": {
+    "pop": "流行",
+    "rock": "摇滚",
+    "hiphop": "嘻哈",
+    "electronic": "电子",
+    "jazz": "爵士",
+    "classical": "古典",
+    "metal": "金属",
+    "country": "乡村",
+    "rnb": "节奏蓝调",
+    "indie": "独立",
+    "latin": "拉丁",
+    "kpop": "韩流",
+    "anime": "动漫",
+    "lofi": "低保真",
+    "blues": "布鲁斯",
+    "reggae": "雷鬼",
+    "disco": "迪斯科",
+    "punk": "朋克",
+    "ambient": "氛围",
+    "random": "随机"
   }
 }

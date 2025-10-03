@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Sélection invalide!",
     "processing": "Traitement en cours...",
     "adding_song_desc": "Ajout de **{title}**...",
-    "error_title": "❌ Erreur"
+    "error_title": "❌ Erreur",
+    "loop_mode_changed_title": "🔁 Mode Boucle Modifié",
+    "loop_mode_off": "Le mode boucle est maintenant **désactivé**",
+    "loop_mode_track": "Mode boucle défini sur **répéter la piste**. La piste actuelle sera lue en continu.",
+    "loop_mode_queue": "Mode boucle défini sur **répéter la file**. La file redémarrera lorsqu'elle sera terminée.",
+    "changed_by": "👤 Modifié par",
+    "autoplay_disabled": "Lecture Automatique Désactivée",
+    "autoplay_disabled_desc": "La fonction de lecture automatique a été désactivée.",
+    "autoplay_select_title": "Sélectionner le Genre pour la Lecture Automatique",
+    "autoplay_select_desc": "Quel genre doit être lu lorsque la file se termine ?",
+    "autoplay_select_genre": "Sélectionnez un genre musical...",
+    "autoplay_enabled": "Lecture Automatique Activée",
+    "autoplay_enabled_desc": "Lecture automatique activée pour le genre **{genre}**. De nouvelles chansons seront ajoutées automatiquement lorsque la file se termine."
   },
   "musicmanager": {
     "playback_ended": "Musique terminée",
@@ -267,6 +279,34 @@
     "stop": "Arrêter",
     "queue": "File",
     "shuffle": "Mélanger",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Boucle",
+    "loop_off": "Boucle: Désactivée",
+    "loop_track": "Boucle: Piste",
+    "loop_queue": "Boucle: File",
+    "autoplay_off": "Lecture Auto: Désactivée",
+    "autoplay_on": "Lecture Auto: Activée"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Électronique",
+    "jazz": "Jazz",
+    "classical": "Classique",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Aléatoire"
   }
 }

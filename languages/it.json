@@ -213,6 +213,13 @@
     "not_authorized": "❌ Solo utenti autorizzati e la persona che ha iniziato la musica possono usare questo pulsante!",
     "no_song_playing": "❌ Nessuna canzone in riproduzione al momento!",
     "operation_failed": "❌ Operazione fallita!",
+  "autoplay_disabled": "🎲 Riproduzione Automatica Disattivata",
+  "autoplay_disabled_desc": "La funzione di riproduzione automatica è stata disattivata.",
+  "autoplay_select_title": "🎵 Seleziona Genere Musicale",
+  "autoplay_select_desc": "Quale genere dovrebbe essere riprodotto quando la coda termina?",
+  "autoplay_select_genre": "Seleziona un genere musicale...",
+  "autoplay_enabled": "🎲 Riproduzione Automatica Attivata",
+  "autoplay_enabled_desc": "Genere: **{genre}**",
     "music_paused": "Musica in Pausa",
     "music_resumed": "Musica Ripresa",
     "action_by": "👤 Azione da",
@@ -252,7 +259,12 @@
     "invalid_selection": "❌ Selezione non valida!",
     "processing": "Elaborazione...",
     "adding_song_desc": "Aggiungendo **{title}**...",
-    "error_title": "❌ Errore"
+    "error_title": "❌ Errore",
+    "loop_mode_changed_title": "🔁 Modalità Ripeti Cambiata",
+    "loop_mode_off": "La modalità ripeti è ora **disattivata**",
+    "loop_mode_track": "Modalità ripeti impostata su **ripeti brano**. Il brano corrente verrà riprodotto continuamente.",
+    "loop_mode_queue": "Modalità ripeti impostata su **ripeti coda**. La coda ripartirà quando finita.",
+    "changed_by": "👤 Modificato da"
   },
   "musicmanager": {
     "playback_ended": "Musica Finita",
@@ -267,6 +279,34 @@
     "stop": "Ferma",
     "queue": "Coda",
     "shuffle": "Mescola",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Ripeti",
+    "loop_off": "Ripeti: Disattivato",
+    "loop_track": "Ripeti: Brano",
+    "loop_queue": "Ripeti: Coda",
+    "autoplay_off": "Riproduzione Auto: Disattivata",
+    "autoplay_on": "Riproduzione Auto: Attivata"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elettronica",
+    "jazz": "Jazz",
+    "classical": "Classica",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latina",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Casuale"
   }
 }

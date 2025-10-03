@@ -393,11 +393,53 @@ class MusicEmbedManager {
             .setEmoji('🔊')
             .setDisabled(disabled);
 
+        // Loop button - cycles through off -> track -> queue
+        let loopLabel, loopEmoji, loopStyle;
+        if (player.loop === 'track') {
+            loopLabel = await LanguageManager.getTranslation(guildId, 'buttons.loop_track');
+            loopEmoji = '🔂';
+            loopStyle = ButtonStyle.Success;
+        } else if (player.loop === 'queue') {
+            loopLabel = await LanguageManager.getTranslation(guildId, 'buttons.loop_queue');
+            loopEmoji = '🔁';
+            loopStyle = ButtonStyle.Success;
+        } else {
+            loopLabel = await LanguageManager.getTranslation(guildId, 'buttons.loop_off');
+            loopEmoji = '➡️';
+            loopStyle = ButtonStyle.Secondary;
+        }
+
+        const loopButton = new ButtonBuilder()
+            .setCustomId(`music_loop:${requesterId}:${sessionId}`)
+            .setLabel(loopLabel)
+            .setStyle(loopStyle)
+            .setEmoji(loopEmoji)
+            .setDisabled(disabled);
+
+        // Autoplay button
+        let autoplayLabel, autoplayEmoji, autoplayStyle;
+        if (player.autoplay) {
+            autoplayLabel = await LanguageManager.getTranslation(guildId, 'buttons.autoplay_on');
+            autoplayEmoji = '🎲';
+            autoplayStyle = ButtonStyle.Success;
+        } else {
+            autoplayLabel = await LanguageManager.getTranslation(guildId, 'buttons.autoplay_off');
+            autoplayEmoji = '🎲';
+            autoplayStyle = ButtonStyle.Secondary;
+        }
+
+        const autoplayButton = new ButtonBuilder()
+            .setCustomId(`music_autoplay:${requesterId}:${sessionId}`)
+            .setLabel(autoplayLabel)
+            .setStyle(autoplayStyle)
+            .setEmoji(autoplayEmoji)
+            .setDisabled(disabled);
+
         const row = new ActionRowBuilder()
             .addComponents(pauseButton, skipButton, stopButton, queueButton, shuffleButton);
 
         const row2 = new ActionRowBuilder()
-            .addComponents(volumeButton);
+            .addComponents(volumeButton, loopButton, autoplayButton);
 
         return [row, row2];
     }

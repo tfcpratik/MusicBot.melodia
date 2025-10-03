@@ -252,7 +252,19 @@
     "invalid_selection": "❌ 無效的選擇！",
     "processing": "處理中...",
     "adding_song_desc": "正在新增 **{title}**...",
-    "error_title": "❌ 錯誤"
+    "error_title": "❌ 錯誤",
+    "loop_mode_changed_title": "🔁 循環模式已更改",
+    "loop_mode_off": "循環模式現已**關閉**",
+    "loop_mode_track": "循環模式設定為**單曲循環**。當前歌曲將持續播放。",
+    "loop_mode_queue": "循環模式設定為**佇列循環**。佇列結束後將重新開始。",
+    "changed_by": "👤 更改者",
+    "autoplay_disabled": "🎲 自動播放已關閉",
+    "autoplay_disabled_desc": "自動播放功能已被關閉。",
+    "autoplay_select_title": "🎵 選擇音樂類型",
+    "autoplay_select_desc": "佇列結束後要播放哪種類型？",
+    "autoplay_select_genre": "請選擇音樂類型...",
+    "autoplay_enabled": "🎲 自動播放已開啟",
+    "autoplay_enabled_desc": "類型：**{genre}**"
   },
   "musicmanager": {
     "playback_ended": "音樂已結束",
@@ -267,6 +279,34 @@
     "stop": "停止",
     "queue": "佇列",
     "shuffle": "隨機播放",
-    "volume": "音量"
+    "volume": "音量",
+    "loop": "循環",
+    "loop_off": "循環: 關閉",
+    "loop_track": "循環: 單曲",
+    "loop_queue": "循環: 佇列",
+    "autoplay_off": "自動播放: 關閉",
+    "autoplay_on": "自動播放: 開啟"
+  },
+  "genres": {
+    "pop": "流行",
+    "rock": "搖滾",
+    "hiphop": "嘻哈",
+    "electronic": "電子",
+    "jazz": "爵士",
+    "classical": "古典",
+    "metal": "金屬",
+    "country": "鄉村",
+    "rnb": "節奏藍調",
+    "indie": "獨立",
+    "latin": "拉丁",
+    "kpop": "韓流",
+    "anime": "動畫",
+    "lofi": "低保真",
+    "blues": "藍調",
+    "reggae": "雷鬼",
+    "disco": "迪斯可",
+    "punk": "龐克",
+    "ambient": "氛圍",
+    "random": "隨機"
   }
 }

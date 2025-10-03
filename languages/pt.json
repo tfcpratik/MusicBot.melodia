@@ -208,6 +208,13 @@
     "no_music_playing": "❌ Nenhuma música está a ser reproduzida atualmente!",
     "same_channel_required": "❌ Deves estar no mesmo canal de voz que o bot!",
     "session_invalid": "❌ Este botão já não é válido! O sistema de música foi reiniciado.",
+    "autoplay_disabled": "🎲 Reprodução Automática Desativada",
+    "autoplay_disabled_desc": "A reprodução automática foi desativada. Nenhuma música nova será adicionada quando a fila terminar.",
+    "autoplay_select_title": "🎵 Selecionar Género Musical",
+    "autoplay_select_desc": "Que género deve tocar quando a fila terminar?",
+    "autoplay_select_genre": "Seleciona um género musical...",
+    "autoplay_enabled": "🎲 Reprodução Automática Ativada",
+    "autoplay_enabled_desc": "Reprodução automática ativada para o género **{genre}**. Novas músicas serão adicionadas automaticamente quando a fila terminar.",
     "unknown_interaction": "❌ Interação desconhecida!",
     "processing_error": "❌ Ocorreu um erro durante o processamento!",
     "not_authorized": "❌ Apenas utilizadores autorizados e a pessoa que iniciou a música podem usar este botão!",
@@ -252,7 +259,12 @@
     "invalid_selection": "❌ Seleção inválida!",
     "processing": "A processar...",
     "adding_song_desc": "A adicionar **{title}**...",
-    "error_title": "❌ Erro"
+    "error_title": "❌ Erro",
+    "loop_mode_changed_title": "🔁 Modo de Repetição Alterado",
+    "loop_mode_off": "O modo de repetição está agora **desligado**",
+    "loop_mode_track": "Modo de repetição definido para **repetir faixa**. A faixa atual tocará continuamente.",
+    "loop_mode_queue": "Modo de repetição definido para **repetir fila**. A fila recomeçará quando terminar.",
+    "changed_by": "👤 Alterado por"
   },
   "musicmanager": {
     "playback_ended": "Música Terminada",
@@ -267,6 +279,34 @@
     "stop": "Parar",
     "queue": "Fila",
     "shuffle": "Baralhar",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Repetir",
+    "loop_off": "Repetir: Desligado",
+    "loop_track": "Repetir: Faixa",
+    "loop_queue": "Repetir: Fila",
+    "autoplay_off": "Auto: Desativado",
+    "autoplay_on": "Auto: Ativado"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Eletrônica",
+    "jazz": "Jazz",
+    "classical": "Clássica",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latina",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambiente",
+    "random": "Aleatório"
   }
 }

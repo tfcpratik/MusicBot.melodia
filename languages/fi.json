@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Virheellinen valinta!",
     "processing": "Käsitellään...",
     "adding_song_desc": "Lisätään **{title}**...",
-    "error_title": "❌ Virhe"
+    "error_title": "❌ Virhe",
+    "loop_mode_changed_title": "🔁 Toistotila Muutettu",
+    "loop_mode_off": "Toistotila on nyt **pois päältä**",
+    "loop_mode_track": "Toistotila asetettu **kappaleen toistoon**. Nykyinen kappale soitetaan jatkuvasti.",
+    "loop_mode_queue": "Toistotila asetettu **jonon toistoon**. Jono alkaa alusta kun se päättyy.",
+    "changed_by": "👤 Muuttaja",
+    "autoplay_disabled": "🎲 Automaattinen toisto pois päältä",
+    "autoplay_disabled_desc": "Automaattinen toisto on poistettu käytöstä.",
+    "autoplay_select_title": "🎵 Valitse musiikkigenre",
+    "autoplay_select_desc": "Mitä genreä toistetaan, kun jono päättyy?",
+    "autoplay_select_genre": "Valitse musiikkigenre...",
+    "autoplay_enabled": "🎲 Automaattinen toisto käytössä",
+    "autoplay_enabled_desc": "Genre: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Musiikki päättyi",
@@ -267,6 +279,34 @@
     "stop": "Pysäytä",
     "queue": "Jono",
     "shuffle": "Sekoita",
-    "volume": "Äänenvoimakkuus"
+    "volume": "Äänenvoimakkuus",
+    "loop": "Toisto",
+    "loop_off": "Toisto: Pois",
+    "loop_track": "Toisto: Kappale",
+    "loop_queue": "Toisto: Jono",
+    "autoplay_off": "Auto: Pois",
+    "autoplay_on": "Auto: Päällä"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektroninen",
+    "jazz": "Jazz",
+    "classical": "Klassinen",
+    "metal": "Metal",
+    "country": "Kantri",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latino",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Satunnainen"
   }
 }

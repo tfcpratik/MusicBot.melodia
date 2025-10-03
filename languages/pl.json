@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Nieprawidłowy wybór!",
     "processing": "Przetwarzanie...",
     "adding_song_desc": "Dodawanie **{title}**...",
-    "error_title": "❌ Błąd"
+    "error_title": "❌ Błąd",
+    "loop_mode_changed_title": "🔁 Tryb Pętli Zmieniony",
+    "loop_mode_off": "Tryb pętli jest teraz **wyłączony**",
+    "loop_mode_track": "Tryb pętli ustawiony na **powtarzanie utworu**. Bieżący utwór będzie odtwarzany ciągle.",
+    "loop_mode_queue": "Tryb pętli ustawiony na **powtarzanie kolejki**. Kolejka zacznie się od nowa po zakończeniu.",
+    "changed_by": "👤 Zmienione przez",
+    "autoplay_disabled": "🎲 Automatyczne odtwarzanie wyłączone",
+    "autoplay_disabled_desc": "Funkcja automatycznego odtwarzania została wyłączona.",
+    "autoplay_select_title": "🎵 Wybierz gatunek muzyczny",
+    "autoplay_select_desc": "Jaki gatunek ma być odtwarzany, gdy kolejka się skończy?",
+    "autoplay_select_genre": "Wybierz gatunek muzyczny...",
+    "autoplay_enabled": "🎲 Automatyczne odtwarzanie włączone",
+    "autoplay_enabled_desc": "Gatunek: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Muzyka Zakończona",
@@ -267,6 +279,34 @@
     "stop": "Zatrzymaj",
     "queue": "Kolejka",
     "shuffle": "Pomieszaj",
-    "volume": "Głośność"
+    "volume": "Głośność",
+    "loop": "Pętla",
+    "loop_off": "Pętla: Wyłączona",
+    "loop_track": "Pętla: Utwór",
+    "loop_queue": "Pętla: Kolejka",
+    "autoplay_off": "Auto: Wyłączone",
+    "autoplay_on": "Auto: Włączone"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektroniczna",
+    "jazz": "Jazz",
+    "classical": "Klasyczna",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latynoska",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Losowy"
   }
 }

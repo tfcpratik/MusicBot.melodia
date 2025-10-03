@@ -1,11 +1,43 @@
 const { Client, GatewayIntentBits, Collection, Events, ActivityType } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 const config = require('./config');
 const chalk = require('chalk');
 
 require("./src/commandLoader"); // Load and deploy commands
+
+// Clean up audio cache directory on startup
+async function cleanupAudioCache() {
+    const cacheDir = path.join(__dirname, 'audio_cache');
+    
+    try {
+        if (fs.existsSync(cacheDir)) {
+            const files = await fsPromises.readdir(cacheDir);
+            
+            for (const file of files) {
+                try {
+                    await fsPromises.unlink(path.join(cacheDir, file));
+                } catch (err) {
+                    console.error(chalk.red(`❌ Failed to delete ${file}:`), err.message);
+                }
+            }
+            
+            console.log(chalk.green(`✅ Cleaned up ${files.length} cached audio files from previous session`));
+        } else {
+            fs.mkdirSync(cacheDir, { recursive: true });
+            console.log(chalk.cyan('📁 Created audio cache directory'));
+        }
+    } catch (error) {
+        console.error(chalk.red('❌ Failed to cleanup audio cache:'), error.message);
+    }
+}
+
+// Run cleanup before starting the bot
+cleanupAudioCache().then(() => {
+    console.log(chalk.cyan('🎵 Starting music bot...'));
+});
 
 
 setTimeout(() => {
@@ -236,6 +268,14 @@ setTimeout(() => {
         // Don't exit on Discord API errors
         if (error.code === 10062 || error.code === 40060) {
             console.log(chalk.yellow('ℹ️ Discord interaction error handled, continuing...'));
+            return;
+        }
+
+        // Handle fetch/network termination errors - don't crash
+        if (error.message && (error.message.includes('terminated') || 
+            error.message.includes('ECONNRESET') || 
+            error.message.includes('ETIMEDOUT'))) {
+            console.log(chalk.yellow('⚠️ Network error occurred, but bot continues running...'));
             return;
         }
 

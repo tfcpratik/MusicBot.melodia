@@ -198,10 +198,10 @@
     "same_channel_required": "❌ Je moet in hetzelfde spraakkanaal zijn als de bot!",
     "invalid_volume": "❌ Volume moet een getal tussen 0-100 zijn!",
     "volume_changed_title": "🔊 Volume Gewijzigd",
-    "volume_changed_desc": "Volume is ingesteld op **{volume}%**!",
+    "volume_changed_desc": "Het volume is ingesteld op **{volume}%**!",
     "set_by": "👤 Ingesteld door",
     "level": "📊 Niveau",
-    "volume_error": "❌ Volume kon niet worden ingesteld!"
+    "volume_error": "❌ Het volume kon niet worden ingesteld!"
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Je moet in een spraakkanaal zijn!",
@@ -213,6 +213,13 @@
     "not_authorized": "❌ Alleen geautoriseerde gebruikers en degene die de muziek startte kunnen deze knop gebruiken!",
     "no_song_playing": "❌ Er wordt momenteel geen nummer afgespeeld!",
     "operation_failed": "❌ Operatie mislukt!",
+    "autoplay_disabled": "🎲 Automatisch Afspelen Uitgeschakeld",
+    "autoplay_disabled_desc": "Automatisch afspelen is uitgeschakeld. Er worden geen nieuwe nummers toegevoegd nadat de wachtrij eindigt.",
+    "autoplay_select_title": "🎵 Selecteer Muziekgenre",
+    "autoplay_select_desc": "Welk genre moet worden afgespeeld wanneer de wachtrij eindigt?",
+    "autoplay_select_genre": "Selecteer een muziekgenre...",
+    "autoplay_enabled": "🎲 Automatisch Afspelen Ingeschakeld",
+    "autoplay_enabled_desc": "Automatisch afspelen is ingeschakeld voor het genre **{genre}**. Zodra de wachtrij eindigt worden automatisch nieuwe nummers toegevoegd.",
     "music_paused": "Muziek Gepauzeerd",
     "music_resumed": "Muziek Hervat",
     "action_by": "👤 Actie door",
@@ -252,7 +259,12 @@
     "invalid_selection": "❌ Ongeldige selectie!",
     "processing": "Verwerken...",
     "adding_song_desc": "**{title}** wordt toegevoegd...",
-    "error_title": "❌ Fout"
+    "error_title": "❌ Fout",
+    "loop_mode_changed_title": "🔁 Herhaalmodus Gewijzigd",
+    "loop_mode_off": "Herhaalmodus is nu **uitgeschakeld**",
+    "loop_mode_track": "Herhaalmodus ingesteld op **nummer herhalen**. Het huidige nummer wordt continu afgespeeld.",
+    "loop_mode_queue": "Herhaalmodus ingesteld op **wachtrij herhalen**. De wachtrij herstart wanneer deze klaar is.",
+    "changed_by": "👤 Gewijzigd door"
   },
   "musicmanager": {
     "playback_ended": "Muziek Beëindigd",
@@ -267,6 +279,34 @@
     "stop": "Stoppen",
     "queue": "Wachtrij",
     "shuffle": "Schudden",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Herhalen",
+    "loop_off": "Herhalen: Uit",
+    "loop_track": "Herhalen: Track",
+    "loop_queue": "Herhalen: Wachtrij",
+    "autoplay_off": "Auto: Uit",
+    "autoplay_on": "Auto: Aan"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronisch",
+    "jazz": "Jazz",
+    "classical": "Klassiek",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latijns",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Willekeurig"
   }
 }

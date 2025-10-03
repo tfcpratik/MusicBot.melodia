@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Ogiltigt val!",
     "processing": "Bearbetar...",
     "adding_song_desc": "Lägger till **{title}**...",
-    "error_title": "❌ Fel"
+    "error_title": "❌ Fel",
+    "loop_mode_changed_title": "🔁 Upprepningsläge Ändrat",
+    "loop_mode_off": "Upprepningsläge är nu **avstängt**",
+    "loop_mode_track": "Upprepningsläge inställt på **upprepa spår**. Nuvarande spår kommer att spelas kontinuerligt.",
+    "loop_mode_queue": "Upprepningsläge inställt på **upprepa kö**. Kön kommer att starta om när den är klar.",
+    "changed_by": "👤 Ändrad av",
+    "autoplay_disabled": "🎲 Automatisk uppspelning inaktiverad",
+    "autoplay_disabled_desc": "Funktionen för automatisk uppspelning har stängts av.",
+    "autoplay_select_title": "🎵 Välj musikgenre",
+    "autoplay_select_desc": "Vilken genre ska spelas när kön tar slut?",
+    "autoplay_select_genre": "Välj en musikgenre...",
+    "autoplay_enabled": "🎲 Automatisk uppspelning aktiverad",
+    "autoplay_enabled_desc": "Genre: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Musik Avslutad",
@@ -267,6 +279,34 @@
     "stop": "Stoppa",
     "queue": "Kö",
     "shuffle": "Blanda",
-    "volume": "Volym"
+    "volume": "Volym",
+    "loop": "Upprepa",
+    "loop_off": "Upprepa: Av",
+    "loop_track": "Upprepa: Spår",
+    "loop_queue": "Upprepa: Kö",
+    "autoplay_off": "Auto: Av",
+    "autoplay_on": "Auto: På"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronisk",
+    "jazz": "Jazz",
+    "classical": "Klassisk",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Slumpmässig"
   }
 }

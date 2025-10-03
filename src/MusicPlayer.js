@@ -19,6 +19,18 @@ const ffmpegPath = require('ffmpeg-static');
 const { promisify } = require('util');
 const { pipeline, Readable } = require('stream');
 const pipelineAsync = promisify(pipeline);
+const fs = require('fs').promises;
+const fsSync = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+// Cache directory for downloaded audio files
+const CACHE_DIR = path.join(__dirname, '..', 'audio_cache');
+
+// Ensure cache directory exists
+if (!fsSync.existsSync(CACHE_DIR)) {
+    fsSync.mkdirSync(CACHE_DIR, { recursive: true });
+}
 
 let cachedFetch;
 async function ensureFetch() {
@@ -52,7 +64,7 @@ class MusicPlayer {
         this.volume = config.bot.defaultVolume;
         this.loop = false; // false, 'track', 'queue'
         this.shuffle = false;
-        this.autoplay = false;
+        this.autoplay = false; // false or genre string: 'pop', 'rock', 'hiphop', etc.
         this.paused = false;
 
         // Timestamps
@@ -92,6 +104,11 @@ class MusicPlayer {
         this.activeStreamInfo = null;
         this.lastPlaybackPosition = 0;
         this.currentTrackStartOffsetMs = 0;
+
+        // Local file caching
+        this.currentDownloadedFile = null; // Path to currently playing downloaded file
+        this.downloadedFiles = new Set(); // Track all downloaded files for cleanup
+        this.downloadingFiles = new Set(); // Track files currently being downloaded to prevent duplicates
 
         // Events setup
         this.setupEvents();
@@ -400,15 +417,23 @@ class MusicPlayer {
                 // Skip the first track ONLY if player was idle and this track will start playing immediately
                 const isAboutToPlay = wasIdle && track === addedTracks[0];
                 if (!isAboutToPlay && !this.preloadedStreams.has(track.url)) {
-                    this.preloadTrack(track).catch(err => console.error(`❌ Preload error for ${track.title}:`, err.message));
+                    this.preloadTrack(track).catch(err => {
+                        if (err && err.message) {
+                            console.error(`❌ Preload error for ${track.title}:`, err.message);
+                        }
+                    });
                 }
             }
 
             // Auto-play if not currently playing
-            if (!this.currentTrack && addedTracks.length > 0) {
-                this.currentTrack = addedTracks[0];
-                await this.play();
-            } else if (!this.audioPlayer.state || this.audioPlayer.state.status === AudioPlayerStatus.Idle) {
+            if (wasIdle) {
+                // Player was idle, start playing the first added track
+                if (addedTracks.length > 0) {
+                    this.currentTrack = addedTracks[0];
+                    await this.play();
+                }
+            } else if (this.audioPlayer.state && this.audioPlayer.state.status === AudioPlayerStatus.Idle) {
+                // Player exists but is idle (finished playing) - start next from queue
                 await this.play();
             }
 
@@ -422,6 +447,188 @@ class MusicPlayer {
         } catch (error) {
             const errorMsg = await LanguageManager.getTranslation(this.guild.id, 'musicplayer.error_adding_track');
             return { success: false, message: errorMsg };
+        }
+    }
+
+    /**
+     * Downloads audio stream to a local file
+     * Works with YouTube, Spotify, SoundCloud, and DirectLink
+     */
+    async downloadTrack(track, streamUrl, streamInfo) {
+        // Generate unique filename based on URL to enable caching
+        const hash = crypto.createHash('md5')
+            .update(track.url)
+            .digest('hex');
+        const extension = '.opus';
+        const filename = `track_${hash}${extension}`;
+        const filepath = path.join(CACHE_DIR, filename);
+        
+        try {
+            // Check if already downloaded (cache hit)
+            if (fsSync.existsSync(filepath)) {
+                const stats = await fs.stat(filepath);
+                if (stats.size > 0) {
+                    console.log(`♻️ Using cached: ${track.title}`);
+                    this.downloadedFiles.add(filepath);
+                    return filepath;
+                }
+            }
+
+            // Check if already downloading - wait for it to complete
+            if (this.downloadingFiles.has(filepath)) {
+                console.log(`⏳ Waiting for download to complete: ${track.title}`);
+                
+                // Wait for the file to be downloaded (max 60 seconds)
+                for (let i = 0; i < 60; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    if (fsSync.existsSync(filepath)) {
+                        const stats = await fs.stat(filepath);
+                        if (stats.size > 0) {
+                            console.log(`✅ Download completed (waited): ${track.title}`);
+                            this.downloadedFiles.add(filepath);
+                            return filepath;
+                        }
+                    }
+                }
+                
+                this.downloadingFiles.delete(filepath);
+                throw new Error('Download timeout - file not ready after 60 seconds');
+            }
+
+            // Mark as downloading
+            this.downloadingFiles.add(filepath);
+
+            console.log(`📥 Downloading: ${track.title}`);
+
+            // For Spotify and SoundCloud - we need to use the YouTube URL
+            // These platforms have DRM protection and can't be downloaded directly
+            let downloadUrl = track.url;
+            
+            if (track.platform === 'spotify' || track.platform === 'soundcloud') {
+                // For Spotify/SoundCloud, we must use the YouTube equivalent
+                if (track.youtubeUrl) {
+                    downloadUrl = track.youtubeUrl;
+                } else {
+                    // Search YouTube and use that URL
+                    const YouTube = require('./YouTube');
+                    const query = track.platform === 'spotify' 
+                        ? `${track.title} ${track.artist}`
+                        : track.title;
+                    
+                    const results = await YouTube.search(query, 1, this.guild?.id);
+                    if (results && results.length > 0) {
+                        downloadUrl = results[0].url;
+                        track.youtubeUrl = downloadUrl; // Cache for future
+                    } else {
+                        this.downloadingFiles.delete(filepath);
+                        throw new Error('Could not find YouTube equivalent');
+                    }
+                }
+            }
+
+            // For YouTube, Spotify (via YouTube), SoundCloud (via YouTube) - use youtube-dl-exec
+            if (track.platform === 'youtube' || track.platform === 'spotify' || track.platform === 'soundcloud') {
+                const youtubedl = require('youtube-dl-exec');
+                
+                await youtubedl(downloadUrl, {
+                    output: filepath,
+                    format: 'bestaudio',
+                    noCheckCertificates: true,
+                    noWarnings: true,
+                    preferFreeFormats: true,
+                    addHeader: [
+                        'referer:youtube.com',
+                        'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    ],
+                    postprocessorArgs: {
+                        'ffmpeg': ['-c:a', 'libopus', '-b:a', '128k']
+                    },
+                    extractAudio: true,
+                    audioFormat: 'opus'
+                });
+            } else {
+                // For DirectLink - fetch and transcode with FFmpeg
+                const fetch = await ensureFetch();
+                const response = await fetch(streamUrl, {
+                    headers: streamInfo?.httpHeaders || {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+
+                if (!response.ok) {
+                    this.downloadingFiles.delete(filepath);
+                    throw new Error(`Failed to fetch: ${response.status}`);
+                }
+
+                let audioStream;
+                if (typeof response.body?.getReader === 'function' && typeof Readable.fromWeb === 'function') {
+                    audioStream = Readable.fromWeb(response.body);
+                } else {
+                    audioStream = response.body;
+                }
+
+                // Transcode to opus
+                const ffmpegProcess = new prism.FFmpeg({
+                    command: ffmpegPath,
+                    args: [
+                        '-i', 'pipe:0',
+                        '-f', 'opus',
+                        '-ar', '48000',
+                        '-ac', '2',
+                        '-b:a', '128k',
+                        '-y',
+                        filepath
+                    ]
+                });
+
+                audioStream.pipe(ffmpegProcess);
+
+                await new Promise((resolve, reject) => {
+                    ffmpegProcess.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else reject(new Error(`FFmpeg exited with code ${code}`));
+                    });
+                    ffmpegProcess.on('error', reject);
+                });
+            }
+
+            console.log(`✅ Downloaded: ${track.title}`);
+
+            // Verify file
+            const stats = await fs.stat(filepath);
+            if (stats.size === 0) {
+                await fs.unlink(filepath).catch(() => {});
+                this.downloadingFiles.delete(filepath);
+                throw new Error('Downloaded file is empty');
+            }
+            console.log(`📊 File size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
+
+            this.downloadedFiles.add(filepath);
+            this.downloadingFiles.delete(filepath); // Remove from downloading set
+            return filepath;
+
+        } catch (error) {
+            this.downloadingFiles.delete(filepath); // Remove from downloading set on error
+            console.error(`❌ Download failed for ${track.title}:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Deletes a downloaded audio file
+     */
+    async deleteDownloadedFile(filepath) {
+        if (!filepath) return;
+
+        try {
+            await fs.unlink(filepath);
+            this.downloadedFiles.delete(filepath);
+            console.log(`🗑️ Deleted: ${path.basename(filepath)}`);
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                console.error(`❌ Failed to delete file ${filepath}:`, error.message);
+            }
         }
     }
 
@@ -560,74 +767,173 @@ class MusicPlayer {
                 streamUrl_final = streamInfo;
             }
 
-            // Fetch stream with proper headers for cross-platform compatibility
-            let audioStream;
-
-            if (typeof streamInfo === 'object' && streamInfo.stream) {
-                // Already a stream object (DirectLink)
-                audioStream = streamInfo.stream;
-            } else if (typeof streamUrl_final === 'string' && /^https?:\/\//i.test(streamUrl_final)) {
-                // Remote URL - fetch with headers
-                const fetch = await ensureFetch();
-                const headers = (typeof streamInfo === 'object' && streamInfo.httpHeaders) || {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Accept': '*/*'
-                };
-
-                const response = await fetch(streamUrl_final, {
-                    headers,
-                    redirect: 'follow'
-                });
-
-                if (!response || !response.ok) {
-                    throw new Error(`Failed to fetch stream: ${response?.status || 'unknown'}`);
-                }
-
-                // Convert web stream to Node.js Readable
-                if (typeof response.body?.getReader === 'function' && typeof Readable.fromWeb === 'function') {
-                    audioStream = Readable.fromWeb(response.body);
-                } else {
-                    audioStream = response.body;
-                }
+            // Check if we can reuse the current downloaded file (for loop track mode)
+            let downloadedFile;
+            let shouldDownload = false;
+            
+            if (this.currentDownloadedFile && fsSync.existsSync(this.currentDownloadedFile)) {
+                // Reuse existing file if it's the same track
+                console.log(`♻️ Reusing cached file: ${this.currentTrack.title}`);
+                downloadedFile = this.currentDownloadedFile;
             } else {
-                // Local file or already a stream
-                audioStream = streamUrl_final;
+                // Check if already pre-downloaded
+                const hash = crypto.createHash('md5').update(this.currentTrack.url).digest('hex');
+                const filepath = path.join(CACHE_DIR, `track_${hash}.opus`);
+                
+                if (fsSync.existsSync(filepath)) {
+                    const stats = fsSync.statSync(filepath);
+                    if (stats.size > 0) {
+                        console.log(`⚡ Using pre-downloaded file: ${this.currentTrack.title}`);
+                        downloadedFile = filepath;
+                        this.downloadedFiles.add(filepath);
+                        this.currentDownloadedFile = filepath;
+                    } else {
+                        shouldDownload = true;
+                    }
+                } else {
+                    shouldDownload = true;
+                }
             }
 
-            // Transcode through FFmpeg for reliable cross-platform playback
-            const ffmpegProcess = new prism.FFmpeg({
-                command: ffmpegPath,
-                args: [
-                    '-analyzeduration', '0',
-                    '-loglevel', '0',
-                    '-i', 'pipe:0',
-                    '-f', 's16le',
-                    '-ar', '48000',
-                    '-ac', '2'
-                ]
-            });
+            // If we need to download, start streaming immediately while downloading in background
+            if (shouldDownload) {
+                console.log(`🎵 Streaming: ${this.currentTrack.title}`);
+                
+                // Start download in background (don't await)
+                const hash = crypto.createHash('md5').update(this.currentTrack.url).digest('hex');
+                const filepath = path.join(CACHE_DIR, `track_${hash}.opus`);
+                
+                // Store track reference for background download (currentTrack might change)
+                const trackToDownload = this.currentTrack;
+                
+                // Download in background
+                this.downloadTrack(trackToDownload, streamUrl_final, streamInfo)
+                    .then(file => {
+                        if (trackToDownload && trackToDownload.title) {
+                            console.log(`✅ Background download completed: ${trackToDownload.title}`);
+                        }
+                        // Only update if we're still on the same track
+                        if (this.currentTrack && this.currentTrack.url === trackToDownload.url) {
+                            this.currentDownloadedFile = file;
+                        }
+                    })
+                    .catch(err => {
+                        if (err && err.message) {
+                            console.error(`⚠️ Background download failed: ${err.message}`);
+                        }
+                    });
 
-            ffmpegProcess.on('error', (err) => {
-                // Ignore "Premature close" - it's expected when tracks end/skip
-                if (err.message && err.message.includes('Premature close')) return;
-                console.error('❌ FFmpeg error:', err.message);
-            });
-
-            // Pipe audio stream into ffmpeg
-            audioStream.pipe(ffmpegProcess);
-
-            // Create audio resource with enhanced buffer settings for complete playback
-            this.resource = createAudioResource(ffmpegProcess, {
-                inputType: StreamType.Raw,
-                inlineVolume: true,
-                silencePaddingFrames: 10,
-                metadata: {
-                    title: this.currentTrack.title,
-                    url: this.currentTrack.url,
-                    duration: streamInfo.duration || this.currentTrack.duration,
-                    bitrate: streamInfo.bitrate || 128
+                // Stream directly for immediate playback
+                let audioStream;
+                if (typeof streamInfo === 'object' && streamInfo.stream) {
+                    audioStream = streamInfo.stream;
+                } else if (typeof streamUrl_final === 'string') {
+                    const fetch = await ensureFetch();
+                    
+                    try {
+                        const response = await fetch(streamUrl_final, {
+                            headers: streamInfo?.httpHeaders || {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                            }
+                        });
+                        
+                        if (!response.ok) throw new Error(`Failed to fetch stream: ${response.status}`);
+                        
+                        audioStream = typeof response.body?.getReader === 'function' && typeof Readable.fromWeb === 'function' 
+                            ? Readable.fromWeb(response.body) 
+                            : response.body;
+                    } catch (fetchError) {
+                        // If streaming fails, wait for download and use that
+                        console.log(`⚠️ Streaming failed, waiting for download: ${fetchError.message}`);
+                        
+                        // Wait for download to complete
+                        for (let i = 0; i < 30; i++) {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            if (fsSync.existsSync(filepath)) {
+                                const stats = fsSync.statSync(filepath);
+                                if (stats.size > 0) {
+                                    shouldDownload = false; // Switch to file mode
+                                    downloadedFile = filepath;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (!downloadedFile) throw fetchError;
+                    }
+                } else {
+                    audioStream = streamUrl_final;
                 }
-            });
+
+                // If streaming failed and we got a downloaded file, skip to file playback
+                if (!audioStream && downloadedFile) {
+                    shouldDownload = false; // Fall through to file playback
+                } else if (audioStream) {
+                    // Create FFmpeg process for streaming
+                    const ffmpegProcess = new prism.FFmpeg({
+                        command: ffmpegPath,
+                        args: [
+                            '-analyzeduration', '0',
+                            '-loglevel', '0',
+                            '-i', 'pipe:0',
+                            '-f', 's16le',
+                            '-ar', '48000',
+                            '-ac', '2'
+                        ]
+                    });
+
+                    ffmpegProcess.on('error', (err) => {
+                        if (err.message && err.message.includes('Premature close')) return;
+                        console.error('❌ FFmpeg streaming error:', err.message);
+                    });
+
+                    audioStream.pipe(ffmpegProcess);
+
+                    this.resource = createAudioResource(ffmpegProcess, {
+                        inputType: StreamType.Raw,
+                        inlineVolume: true,
+                        metadata: {
+                            title: this.currentTrack.title,
+                            url: this.currentTrack.url,
+                            duration: streamInfo.duration || this.currentTrack.duration,
+                            bitrate: streamInfo.bitrate || 128
+                        }
+                    });
+                }
+            }
+            
+            // File playback mode (either pre-downloaded or fallback from streaming)
+            if (!shouldDownload && downloadedFile) {
+                console.log(`▶️ Playing from cache: ${this.currentTrack.title}`);
+                
+                const ffmpegProcess = new prism.FFmpeg({
+                    command: ffmpegPath,
+                    args: [
+                        '-i', downloadedFile,
+                        '-analyzeduration', '0',
+                        '-loglevel', '0',
+                        '-f', 's16le',
+                        '-ar', '48000',
+                        '-ac', '2'
+                    ]
+                });
+
+                ffmpegProcess.on('error', (err) => {
+                    if (err.message && err.message.includes('Premature close')) return;
+                    console.error('❌ FFmpeg playback error:', err.message);
+                });
+
+                this.resource = createAudioResource(ffmpegProcess, {
+                    inputType: StreamType.Raw,
+                    inlineVolume: true,
+                    metadata: {
+                        title: this.currentTrack.title,
+                        url: this.currentTrack.url,
+                        duration: streamInfo.duration || this.currentTrack.duration,
+                        bitrate: streamInfo.bitrate || 128
+                    }
+                });
+            }
 
             // Set volume
             if (this.resource.volume) {
@@ -665,6 +971,12 @@ class MusicPlayer {
             return { success: true, track: this.currentTrack };
 
         } catch (error) {
+            // Clean up downloaded file on error
+            if (this.currentDownloadedFile) {
+                await this.deleteDownloadedFile(this.currentDownloadedFile);
+                this.currentDownloadedFile = null;
+            }
+
             await this.handleError(error);
             const errorMsg = await LanguageManager.getTranslation(this.guild.id, 'musicplayer.track_could_not_play');
             return { success: false, message: errorMsg };
@@ -807,6 +1119,18 @@ class MusicPlayer {
             clearTimeout(this.trackTimer);
             this.trackTimer = null;
         }
+
+        // Clean up current downloaded file
+        if (this.currentDownloadedFile) {
+            this.deleteDownloadedFile(this.currentDownloadedFile);
+            this.currentDownloadedFile = null;
+        }
+
+        // Clean up all downloaded files
+        for (const filepath of this.downloadedFiles) {
+            this.deleteDownloadedFile(filepath);
+        }
+        this.downloadedFiles.clear();
 
         this.queue = [];
         this.currentTrack = null;
@@ -969,6 +1293,12 @@ class MusicPlayer {
 
             this.previousTracks.push(finishedTrack);
 
+            // Clean up downloaded file for finished track (unless looping track)
+            if (this.loop !== 'track' && this.currentDownloadedFile) {
+                await this.deleteDownloadedFile(this.currentDownloadedFile);
+                this.currentDownloadedFile = null;
+            }
+
             if (this.loop === 'track') {
                 await this.play();
                 return;
@@ -1035,8 +1365,129 @@ class MusicPlayer {
     }
 
     async handleAutoplay() {
-        // Implementation for autoplay feature
-        // This would search for related tracks based on the current track
+        if (!this.autoplay || typeof this.autoplay !== 'string') return;
+
+        try {
+            console.log(`🎲 Autoplay: Finding ${this.autoplay} music...`);
+
+            // Genre-specific search keywords
+            const genreKeywords = {
+                pop: ['pop music 2024', 'top pop songs', 'pop hits official', 'best pop music'],
+                rock: ['rock music official', 'rock songs 2024', 'classic rock hits', 'best rock music'],
+                hiphop: ['hip hop music', 'rap songs official', 'hip hop 2024', 'best rap music'],
+                electronic: ['edm music', 'electronic dance music', 'house music official', 'best edm'],
+                jazz: ['jazz music', 'jazz standards', 'smooth jazz official', 'best jazz'],
+                classical: ['classical music', 'classical piano', 'orchestra music', 'best classical'],
+                metal: ['metal music official', 'heavy metal songs', 'metal 2024', 'best metal'],
+                country: ['country music official', 'country songs 2024', 'best country music'],
+                rnb: ['r&b music official', 'rnb songs 2024', 'soul music', 'best rnb'],
+                indie: ['indie music official', 'indie songs 2024', 'alternative music', 'best indie'],
+                latin: ['latin music official', 'reggaeton 2024', 'latin hits', 'best latin music'],
+                kpop: ['kpop official mv', 'kpop songs 2024', 'korean music official', 'best kpop'],
+                anime: ['anime opening official', 'anime songs official', 'anime music 2024', 'best anime op'],
+                lofi: ['lofi hip hop music', 'lofi beats official', 'chill lofi music', 'best lofi'],
+                blues: ['blues music official', 'blues songs', 'blues guitar music', 'best blues'],
+                reggae: ['reggae music official', 'reggae songs 2024', 'best reggae music'],
+                disco: ['disco music official', 'disco hits', 'best disco music'],
+                punk: ['punk rock official', 'punk music 2024', 'pop punk songs', 'best punk'],
+                ambient: ['ambient music official', 'ambient soundscape', 'atmospheric music', 'best ambient'],
+                random: ['music official video', 'top songs 2024', 'music video official', 'best music']
+            };
+
+            const keywords = genreKeywords[this.autoplay] || genreKeywords.random;
+            const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+
+            // Search YouTube for random track
+            const YouTube = require('./YouTube');
+            const results = await YouTube.search(randomKeyword, 15, this.guild.id);
+
+            if (!results || results.length === 0) {
+                console.log('⚠️ Autoplay: No results found');
+                return;
+            }
+
+            // Filter out non-music content
+            const filteredResults = results.filter(track => {
+                // Skip if duration is missing
+                if (!track.duration) return false;
+                
+                // Duration limits: 30 seconds to 10 minutes (600 seconds)
+                // This filters out most tutorials, lessons, podcasts, and full movies
+                if (track.duration < 30 || track.duration > 600) return false;
+                
+                // Filter out common non-music keywords in title
+                const title = (track.title || '').toLowerCase();
+                const blockedKeywords = [
+                    'tutorial', 'lesson', 'course', 'learn', 'learning',
+                    'podcast', 'interview', 'talk', 'speech', 'lecture',
+                    'review', 'unboxing', 'reaction', 'gameplay',
+                    'full movie', 'full album', 'full episode', 'documentary',
+                    'how to', 'guide', 'tips', 'tricks', 'vlog',
+                    'practice', 'exercise', 'workout', 'meditation',
+                    'asmr', 'story', 'audiobook', 'mix |', 'compilation'
+                ];
+                
+                // Check if title contains any blocked keywords
+                const hasBlockedKeyword = blockedKeywords.some(keyword => title.includes(keyword));
+                if (hasBlockedKeyword) return false;
+                
+                // Filter out playlist-like content (mixes and compilations often have many emojis or brackets)
+                const emojiCount = (title.match(/[\u{1F300}-\u{1F9FF}]/gu) || []).length;
+                const bracketCount = (title.match(/[\[\]【】]/g) || []).length;
+                if (emojiCount > 3 || bracketCount > 4) return false;
+                
+                return true;
+            });
+
+            if (filteredResults.length === 0) {
+                console.log('⚠️ Autoplay: All results filtered out, retrying with different keyword');
+                // Try again with a different keyword
+                const fallbackKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+                const fallbackResults = await YouTube.search(fallbackKeyword, 10, this.guild.id);
+                const fallbackFiltered = (fallbackResults || []).filter(track => 
+                    track.duration >= 30 && track.duration <= 600
+                );
+                
+                if (fallbackFiltered.length === 0) {
+                    console.log('⚠️ Autoplay: No suitable tracks found');
+                    return;
+                }
+                
+                filteredResults.push(...fallbackFiltered);
+            }
+
+            // Pick random track from filtered results
+            const randomTrack = filteredResults[Math.floor(Math.random() * filteredResults.length)];
+            randomTrack.requestedBy = this.guild.members.me.user;
+            randomTrack.addedAt = Date.now();
+
+            // Add to queue
+            this.queue.push(randomTrack);
+            
+            console.log(`✅ Autoplay: Added "${randomTrack.title}" (${randomTrack.duration}s)`);
+
+            // Preload track
+            this.preloadTrack(randomTrack).catch(err => {
+                if (err && err.message) {
+                    console.error(`❌ Autoplay preload failed: ${err.message}`);
+                }
+            });
+
+            // Start playing
+            this.currentTrack = this.queue.shift();
+            await this.play();
+
+            // Update now playing embed for autoplay track
+            const MusicEmbedManager = require('./MusicEmbedManager');
+            if (global.clients && global.clients.musicEmbedManager) {
+                await global.clients.musicEmbedManager.updateNowPlayingEmbed(this);
+            }
+
+            console.log(`🎲 Autoplay: Now playing "${this.currentTrack.title}"`);
+
+        } catch (error) {
+            console.error('❌ Autoplay error:', error.message);
+        }
     }
 
     async handleError(error) {
@@ -1068,16 +1519,36 @@ class MusicPlayer {
 
     // Preloading System
     async preloadTrack(track) {
-        if (!track || this.preloadedStreams.has(track.url)) return;
+        if (!track || !track.url) return;
 
-        // Prevent duplicate preloading
-        if (this.preloadingQueue.includes(track.url)) return;
+        // Check if already downloaded
+        const hash = crypto.createHash('md5').update(track.url).digest('hex');
+        const filepath = path.join(CACHE_DIR, `track_${hash}.opus`);
+        
+        if (fsSync.existsSync(filepath)) {
+            const stats = fsSync.statSync(filepath);
+            if (stats.size > 0) {
+                console.log(`⏭️ Already cached: ${track.title}`);
+                return; // Already downloaded
+            }
+        }
+
+        // Check if already preloading/downloading (including downloadingFiles set)
+        if (this.preloadedStreams.has(track.url) || 
+            this.preloadingQueue.includes(track.url) ||
+            this.downloadingFiles.has(filepath)) {
+            console.log(`⏸️ Already downloading: ${track.title}`);
+            return;
+        }
+
         this.preloadingQueue.push(track.url);
+        console.log(`⬇️ Pre-downloading: ${track.title}`);
 
         try {
             let streamUrl = track.url;
             let streamInfo;
 
+            // Get stream URL first
             switch (track.platform) {
                 case 'youtube':
                     streamInfo = await YouTube.getStream(streamUrl, this.guild.id);
@@ -1107,14 +1578,29 @@ class MusicPlayer {
             }
 
             if (streamInfo) {
-                // Cache stream info - keep until played
+                // Download track in background
+                let streamUrl_final;
+                if (typeof streamInfo === 'string') {
+                    streamUrl_final = streamInfo;
+                } else if (streamInfo && typeof streamInfo === 'object') {
+                    streamUrl_final = streamInfo.stream || streamInfo.url;
+                } else {
+                    streamUrl_final = streamInfo;
+                }
+
+                await this.downloadTrack(track, streamUrl_final, streamInfo);
+                
+                // Mark as preloaded
                 this.preloadedStreams.set(track.url, {
                     info: streamInfo,
-                    track: track
+                    track: track,
+                    downloaded: true
                 });
             }
         } catch (error) {
-            console.error(`❌ Preload failed for ${track.title}:`, error.message);
+            if (error && error.message) {
+                console.error(`❌ Pre-download failed for ${track.title}:`, error.message);
+            }
         } finally {
             // Remove from preloading queue
             const index = this.preloadingQueue.indexOf(track.url);
@@ -1169,6 +1655,17 @@ class MusicPlayer {
 
     cleanup() {
         try {
+            // Clean up all downloaded files
+            if (this.currentDownloadedFile) {
+                this.deleteDownloadedFile(this.currentDownloadedFile);
+                this.currentDownloadedFile = null;
+            }
+
+            for (const filepath of this.downloadedFiles) {
+                this.deleteDownloadedFile(filepath);
+            }
+            this.downloadedFiles.clear();
+
             // Stop recovery system
             this.stopConnectionRecovery();
 

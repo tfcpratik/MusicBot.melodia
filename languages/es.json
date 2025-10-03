@@ -252,7 +252,19 @@
     "invalid_selection": "❌ ¡Selección inválida!",
     "processing": "Procesando...",
     "adding_song_desc": "Añadiendo **{title}**...",
-    "error_title": "❌ Error"
+    "error_title": "❌ Error",
+    "loop_mode_changed_title": "🔁 Modo de Repetición Cambiado",
+    "loop_mode_off": "El modo de repetición está ahora **desactivado**",
+    "loop_mode_track": "Modo de repetición configurado en **repetir canción**. La canción actual se reproducirá continuamente.",
+    "loop_mode_queue": "Modo de repetición configurado en **repetir cola**. La cola se reiniciará cuando termine.",
+    "changed_by": "👤 Cambiado por",
+    "autoplay_disabled": "Reproducción Automática Desactivada",
+    "autoplay_disabled_desc": "La función de reproducción automática se ha desactivado.",
+    "autoplay_select_title": "Seleccionar Género para Reproducción Automática",
+    "autoplay_select_desc": "¿Qué género debería reproducirse cuando termine la cola?",
+    "autoplay_select_genre": "Selecciona un género musical...",
+    "autoplay_enabled": "Reproducción Automática Activada",
+    "autoplay_enabled_desc": "Reproducción automática activada para el género **{genre}**. Se añadirán nuevas canciones automáticamente cuando termine la cola."
   },
   "musicmanager": {
     "playback_ended": "Música Terminada",
@@ -267,6 +279,34 @@
     "stop": "Detener",
     "queue": "Cola",
     "shuffle": "Aleatorio",
-    "volume": "Volumen"
+    "volume": "Volumen",
+    "loop": "Repetir",
+    "loop_off": "Repetir: Desactivado",
+    "loop_track": "Repetir: Canción",
+    "loop_queue": "Repetir: Cola",
+    "autoplay_off": "Reproducción Automática: Desactivada",
+    "autoplay_on": "Reproducción Automática: Activada"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Electrónica",
+    "jazz": "Jazz",
+    "classical": "Clásica",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latina",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambiental",
+    "random": "Aleatorio"
   }
 }

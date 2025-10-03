@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Ungültige Auswahl!",
     "processing": "Verarbeitung läuft...",
     "adding_song_desc": "**{title}** wird hinzugefügt...",
-    "error_title": "❌ Fehler"
+    "error_title": "❌ Fehler",
+    "loop_mode_changed_title": "🔁 Schleifenmodus Geändert",
+    "loop_mode_off": "Schleifenmodus ist jetzt **deaktiviert**",
+    "loop_mode_track": "Schleifenmodus auf **Titel wiederholen** gesetzt. Der aktuelle Titel wird kontinuierlich abgespielt.",
+    "loop_mode_queue": "Schleifenmodus auf **Warteschlange wiederholen** gesetzt. Die Warteschlange wird neu gestartet, wenn sie beendet ist.",
+    "changed_by": "👤 Geändert von",
+    "autoplay_disabled": "Autoplay Deaktiviert",
+    "autoplay_disabled_desc": "Die Autoplay-Funktion wurde deaktiviert.",
+    "autoplay_select_title": "Genre für Autoplay Auswählen",
+    "autoplay_select_desc": "Welches Genre soll abgespielt werden, wenn die Warteschlange endet?",
+    "autoplay_select_genre": "Wählen Sie ein Musikgenre...",
+    "autoplay_enabled": "Autoplay Aktiviert",
+    "autoplay_enabled_desc": "Autoplay für **{genre}** Genre aktiviert. Neue Songs werden automatisch hinzugefügt, wenn die Warteschlange endet."
   },
   "musicmanager": {
     "playback_ended": "Musik Beendet",
@@ -267,6 +279,34 @@
     "stop": "Stopp",
     "queue": "Warteschlange",
     "shuffle": "Mischen",
-    "volume": "Lautstärke"
+    "volume": "Lautstärke",
+    "loop": "Schleife",
+    "loop_off": "Schleife: Aus",
+    "loop_track": "Schleife: Titel",
+    "loop_queue": "Schleife: Warteschlange",
+    "autoplay_off": "Autoplay: Aus",
+    "autoplay_on": "Autoplay: An"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronisch",
+    "jazz": "Jazz",
+    "classical": "Klassik",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Zufällig"
   }
 }

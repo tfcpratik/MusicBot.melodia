@@ -91,6 +91,14 @@ module.exports = {
                     await this.handleVolumeModal(interaction, player, requesterId);
                     break;
 
+                case 'music_loop':
+                    await this.handleLoop(interaction, player, requesterId);
+                    break;
+
+                case 'music_autoplay':
+                    await this.handleAutoplay(interaction, player, requesterId);
+                    break;
+
                 default:
                     await interaction.reply({
                         content: await LanguageManager.getTranslation(guild?.id, 'buttonhandler.unknown_interaction'),
@@ -466,6 +474,181 @@ module.exports = {
         modal.addComponents(actionRow);
 
         await interaction.showModal(modal);
+    },
+
+    async handleLoop(interaction, player, requesterId) {
+        // Authorization check
+        if (!this.isAuthorized(interaction, requesterId)) {
+            return await interaction.reply({
+                content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.not_authorized'),
+                flags: [1 << 6]
+            });
+        }
+
+        if (!player.currentTrack) {
+            return await interaction.reply({
+                content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.no_song_playing'),
+                flags: [1 << 6]
+            });
+        }
+
+        // Cycle through loop modes: false -> 'track' -> 'queue' -> false
+        let newLoopMode;
+        let modeMessage;
+        let modeEmoji;
+
+        if (player.loop === false || player.loop === 'off') {
+            newLoopMode = 'track';
+            modeMessage = await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.loop_mode_track');
+            modeEmoji = '🔂';
+        } else if (player.loop === 'track') {
+            newLoopMode = 'queue';
+            modeMessage = await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.loop_mode_queue');
+            modeEmoji = '🔁';
+        } else {
+            newLoopMode = false;
+            modeMessage = await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.loop_mode_off');
+            modeEmoji = '➡️';
+        }
+
+        // Update player loop mode
+        player.loop = newLoopMode;
+
+        const loopTitle = await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.loop_mode_changed_title');
+        const changedByLabel = await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.changed_by');
+
+        const embed = new EmbedBuilder()
+            .setTitle(`${modeEmoji} ${loopTitle}`)
+            .setDescription(modeMessage)
+            .setColor(config.bot.embedColor)
+            .setTimestamp()
+            .addFields({
+                name: changedByLabel,
+                value: `${interaction.member}`,
+                inline: true
+            });
+
+        if (player.currentTrack && player.currentTrack.thumbnail) {
+            embed.setThumbnail(player.currentTrack.thumbnail);
+        }
+
+        await interaction.reply({ embeds: [embed], flags: [1 << 6] });
+
+        // Update the main embed to reflect the new loop mode
+        if (interaction.client.musicEmbedManager) {
+            await interaction.client.musicEmbedManager.updateNowPlayingEmbed(player);
+        }
+    },
+
+    async handleAutoplay(interaction, player, requesterId) {
+        const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
+        
+        // Authorization check
+        if (!this.isAuthorized(interaction, requesterId)) {
+            return await interaction.reply({
+                content: await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.not_authorized'),
+                flags: [1 << 6]
+            });
+        }
+
+        // If autoplay is already enabled, turn it off
+        if (player.autoplay) {
+            player.autoplay = false;
+            
+            const embed = new EmbedBuilder()
+                .setTitle('🎲 ' + await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.autoplay_disabled'))
+                .setDescription(await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.autoplay_disabled_desc'))
+                .setColor(config.bot.embedColor)
+                .setTimestamp();
+
+            await interaction.reply({ embeds: [embed], flags: [1 << 6] });
+            
+            // Update the main embed
+            if (interaction.client.musicEmbedManager) {
+                await interaction.client.musicEmbedManager.updateNowPlayingEmbed(player);
+            }
+            return;
+        }
+
+        // Show genre selection menu
+        const select = new StringSelectMenuBuilder()
+            .setCustomId(`autoplay_genre:${requesterId}:${player.sessionId}`)
+            .setPlaceholder(await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.autoplay_select_genre'))
+            .addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.pop'))
+                    .setValue('pop')
+                    .setEmoji('🎤'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.rock'))
+                    .setValue('rock')
+                    .setEmoji('🎸'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.hiphop'))
+                    .setValue('hiphop')
+                    .setEmoji('🎧'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.electronic'))
+                    .setValue('electronic')
+                    .setEmoji('🎛️'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.jazz'))
+                    .setValue('jazz')
+                    .setEmoji('🎷'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.classical'))
+                    .setValue('classical')
+                    .setEmoji('🎻'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.metal'))
+                    .setValue('metal')
+                    .setEmoji('🤘'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.country'))
+                    .setValue('country')
+                    .setEmoji('🤠'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.rnb'))
+                    .setValue('rnb')
+                    .setEmoji('💃'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.indie'))
+                    .setValue('indie')
+                    .setEmoji('🌿'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.latin'))
+                    .setValue('latin')
+                    .setEmoji('💃'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.kpop'))
+                    .setValue('kpop')
+                    .setEmoji('🇰🇷'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.anime'))
+                    .setValue('anime')
+                    .setEmoji('🎌'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.lofi'))
+                    .setValue('lofi')
+                    .setEmoji('🌙'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(await LanguageManager.getTranslation(interaction.guild?.id, 'genres.random'))
+                    .setValue('random')
+                    .setEmoji('🎲')
+            );
+
+        const row = new ActionRowBuilder().addComponents(select);
+
+        const embed = new EmbedBuilder()
+            .setTitle('🎲 ' + await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.autoplay_select_title'))
+            .setDescription(await LanguageManager.getTranslation(interaction.guild?.id, 'buttonhandler.autoplay_select_desc'))
+            .setColor(config.bot.embedColor);
+
+        await interaction.reply({
+            embeds: [embed],
+            components: [row],
+            flags: [1 << 6]
+        });
     },
 
     createProgressBar(current, total) {

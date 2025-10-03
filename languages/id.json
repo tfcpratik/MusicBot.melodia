@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Pilihan tidak valid!",
     "processing": "Memproses...",
     "adding_song_desc": "Menambahkan **{title}**...",
-    "error_title": "❌ Kesalahan"
+    "error_title": "❌ Kesalahan",
+    "loop_mode_changed_title": "🔁 Mode Ulangi Diubah",
+    "loop_mode_off": "Mode ulangi sekarang **dimatikan**",
+    "loop_mode_track": "Mode ulangi diatur ke **ulangi lagu**. Lagu saat ini akan diputar terus menerus.",
+    "loop_mode_queue": "Mode ulangi diatur ke **ulangi antrian**. Antrian akan dimulai ulang saat selesai.",
+    "changed_by": "👤 Diubah oleh",
+    "autoplay_disabled": "🎲 Pemutaran Otomatis Dinonaktifkan",
+    "autoplay_disabled_desc": "Fitur pemutaran otomatis telah dimatikan.",
+    "autoplay_select_title": "🎵 Pilih Genre Musik",
+    "autoplay_select_desc": "Genre apa yang harus diputar saat antrian berakhir?",
+    "autoplay_select_genre": "Pilih genre musik...",
+    "autoplay_enabled": "🎲 Pemutaran Otomatis Diaktifkan",
+    "autoplay_enabled_desc": "Genre: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Musik Berakhir",
@@ -267,6 +279,34 @@
     "stop": "Berhenti",
     "queue": "Antrian",
     "shuffle": "Acak",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Ulangi",
+    "loop_off": "Ulangi: Mati",
+    "loop_track": "Ulangi: Lagu",
+    "loop_queue": "Ulangi: Antrian",
+    "autoplay_off": "Auto: Mati",
+    "autoplay_on": "Auto: Aktif"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronik",
+    "jazz": "Jazz",
+    "classical": "Klasik",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Acak"
   }
 }

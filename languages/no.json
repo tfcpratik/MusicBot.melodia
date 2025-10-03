@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Ugyldig valg!",
     "processing": "Behandler...",
     "adding_song_desc": "Legger til **{title}**...",
-    "error_title": "❌ Feil"
+    "error_title": "❌ Feil",
+    "loop_mode_changed_title": "🔁 Gjentagelsesmodus Endret",
+    "loop_mode_off": "Gjentagelsesmodus er nå **av**",
+    "loop_mode_track": "Gjentagelsesmodus satt til **gjenta spør**. Nåværende spør vil spille kontinuerlig.",
+    "loop_mode_queue": "Gjentagelsesmodus satt til **gjenta kø**. Køen vil starte på nytt når den er ferdig.",
+    "changed_by": "👤 Endret av",
+    "autoplay_disabled": "🎲 Automatisk avspilling deaktivert",
+    "autoplay_disabled_desc": "Funksjonen for automatisk avspilling er slått av.",
+    "autoplay_select_title": "🎵 Velg musikkgenre",
+    "autoplay_select_desc": "Hvilken genre skal spilles når køen er tom?",
+    "autoplay_select_genre": "Velg en musikkgenre...",
+    "autoplay_enabled": "🎲 Automatisk avspilling aktivert",
+    "autoplay_enabled_desc": "Sjanger: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Musikk Avsluttet",
@@ -267,6 +279,34 @@
     "stop": "Stopp",
     "queue": "Kø",
     "shuffle": "Bland",
-    "volume": "Volum"
+    "volume": "Volum",
+    "loop": "Gjenta",
+    "loop_off": "Gjenta: Av",
+    "loop_track": "Gjenta: Spør",
+    "loop_queue": "Gjenta: Kø",
+    "autoplay_off": "Auto: Av",
+    "autoplay_on": "Auto: På"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronisk",
+    "jazz": "Jazz",
+    "classical": "Klassisk",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Tilfeldig"
   }
 }

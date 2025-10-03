@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Ugyldigt valg!",
     "processing": "Behandler...",
     "adding_song_desc": "Tilføjer **{title}**...",
-    "error_title": "❌ Fejl"
+    "error_title": "❌ Fejl",
+    "loop_mode_changed_title": "🔁 Gentagelsestilstand Ændret",
+    "loop_mode_off": "Gentagelsestilstand er nu **deaktiveret**",
+    "loop_mode_track": "Gentagelsestilstand indstillet til **sang gentag**. Den aktuelle sang vil spille kontinuerligt.",
+    "loop_mode_queue": "Gentagelsestilstand indstillet til **kø gentag**. Køen vil genstarte når den er færdig.",
+    "changed_by": "👤 Ændret af",
+    "autoplay_disabled": "🎲 Automatisk Afspilning Deaktiveret",
+    "autoplay_disabled_desc": "Funktionen til automatisk afspilning er blevet deaktiveret.",
+    "autoplay_select_title": "🎵 Vælg Musikgenre",
+    "autoplay_select_desc": "Hvilken genre skal afspilles, når køen er tom?",
+    "autoplay_select_genre": "Vælg en musikgenre...",
+    "autoplay_enabled": "🎲 Automatisk Afspilning Aktiveret",
+    "autoplay_enabled_desc": "Genre: **{genre}**"
   },
   "musicmanager": {
     "playback_ended": "Musik Slut",
@@ -267,6 +279,34 @@
     "stop": "Stop",
     "queue": "Kø",
     "shuffle": "Bland",
-    "volume": "Lydstyrke"
+    "volume": "Lydstyrke",
+    "loop": "Gentag",
+    "loop_off": "Gentag: Fra",
+    "loop_track": "Gentag: Sang",
+    "loop_queue": "Gentag: Kø",
+    "autoplay_off": "Auto: Fra",
+    "autoplay_on": "Auto: Til"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Elektronisk",
+    "jazz": "Jazz",
+    "classical": "Klassisk",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Tilfældig"
   }
 }

@@ -1,15 +1,24 @@
 <div align="center">
 
-# MusicMaker v16.0 🎶
+# MusicMaker v16.0 🎶## Project Highlights
 
-A next-generation Discord music bot crafted with **discord.js v14**, engineered for cinematic embeds, lossless playback, and frictionless control across desktop and mobile.
+| Capability | Details |
+| --- | --- |
+| 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
+| 🪄 Smart Queue | Instant mix-ins, sequential preloading, shuffle with DJ-only guardrails, and playlist collapsing to keep channels tidy. |
+| 🔁 Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
+| 🎲 Autoplay Engine | Genre-aware autoplay with intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
+| 💾 Local Audio Cache | All tracks are pre-downloaded and cached locally to eliminate stream interruptions, network lag, and voice crackling—delivering buffer-free playback even during peak Discord load or ISP throttling. |
+| 🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
+| 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
+| ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |generation Discord music bot crafted with **discord.js v14**, engineered for cinematic embeds, lossless playback, and frictionless control across desktop and mobile.
 
 ![GitHub Stars](https://img.shields.io/github/stars/umutxyp/musicbot?style=social)
 ![GitHub Forks](https://img.shields.io/github/forks/umutxyp/musicbot?style=social)
 ![GitHub Issues](https://img.shields.io/github/issues/umutxyp/musicbot)
 ![GitHub License](https://img.shields.io/github/license/umutxyp/musicbot)
 
-[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me/c/e14c8c3b-a1bb-4b57-bbe1-4358e3b605a5)
+[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me)
 
 </div>
 
@@ -50,7 +59,8 @@ A next-generation Discord music bot crafted with **discord.js v14**, engineered 
 | --- | --- |
 | 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
 | 🪄 Smart Queue | Instant mix-ins, sequential preloading, shuffle with DJ-only guardrails, and playlist collapsing to keep channels tidy. |
-| 🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
+| � Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
+| �🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
 | ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |
 
@@ -314,8 +324,174 @@ SHARD_RESPAWN=false
 - **📋 Queue** – Renders the next 10 tracks with real-time progress bar.
 - **🔀 Shuffle** – Randomizes the queue with guard rails (min. 2 tracks).
 - **🔊 Volume** – Opens a modal allowing 0–100 input.
+- **🔁 Loop** – Cycles through loop modes: Off → Track Repeat → Queue Repeat. Track mode replays the current song endlessly; Queue mode restarts the entire queue when finished.
+- **🎲 Autoplay** – Toggles genre-based autoplay (Off → On with genre selection). When enabled, the bot automatically adds matching music from your selected genre when the queue ends, keeping the music flowing seamlessly.
 
 All button sessions carry a short-lived signature, preventing stale interactions from previous queues.
+
+---
+
+## 🎲 Autoplay System
+
+MusicMaker features an intelligent autoplay engine that keeps the music flowing when your queue runs out.
+
+### How It Works
+
+1. **Enable Autoplay** – Click the 🎲 Autoplay button on the now-playing embed
+2. **Choose Your Genre** – Select from 20 carefully curated genres:
+   - 🎵 Pop, Rock, Hip-Hop, Electronic, Jazz, Classical, Metal, Country
+   - 🎸 R&B, Indie, Latin, K-Pop, Anime, Lo-Fi, Blues, Reggae
+   - 🎹 Disco, Punk, Ambient, or Random (all genres)
+3. **Sit Back & Enjoy** – When your queue ends, the bot automatically searches and queues relevant tracks
+
+### Smart Content Filtering
+
+The autoplay system includes sophisticated filters to ensure you only get actual music:
+
+**Duration Limits:**
+- ✅ Minimum: 30 seconds
+- ✅ Maximum: 10 minutes (600 seconds)
+- ❌ Filters out: Full movies, podcasts, long tutorials, DJ sets
+
+**Keyword Blocking:**
+Automatically skips content containing:
+- Tutorial, lesson, course, how-to, guide
+- Podcast, interview, talk, speech, lecture
+- Review, unboxing, reaction, gameplay
+- Full movie, full album, documentary
+- ASMR, audiobook, story, meditation
+- Mix, compilation (long-form content)
+
+**Quality Checks:**
+- Filters excessive emojis (spam/clickbait indicators)
+- Blocks playlist-style titles with many brackets
+- Prioritizes official music videos and verified uploads
+
+### Genre-Specific Keywords
+
+Each genre uses optimized search terms to find the best content:
+
+| Genre | Search Strategy |
+| --- | --- |
+| **Anime** | "anime opening official", "anime songs official", "best anime op" |
+| **K-Pop** | "kpop official mv", "kpop songs 2024", "korean music official" |
+| **Lo-Fi** | "lofi hip hop music", "lofi beats official", "chill lofi music" |
+| **Electronic** | "edm music", "electronic dance music", "house music official" |
+| **Others** | Similarly optimized with "official", year markers, and quality indicators |
+
+### Fallback Mechanism
+
+If the first search yields no suitable tracks after filtering:
+- Automatically retries with a different keyword from the genre pool
+- Ensures you always get music, never silence
+- Logs the entire process for transparency
+
+### Local Caching Integration
+
+All autoplay tracks leverage the same local cache system as manual plays:
+- **Pre-downloaded** before playback starts
+- **Zero buffering** during playback
+- **Instant playback** from local storage
+- **Automatic cleanup** when tracks finish
+
+### Console Transparency
+
+Watch the autoplay engine work in real-time:
+
+```
+🎲 Autoplay: Finding anime music...
+✅ Autoplay: Added "YOASOBI - アイドル (Idol) [Official Music Video]" (244s)
+⬇️ Pre-downloading: YOASOBI - アイドル (Idol) [Official Music Video]
+📥 Downloading: YOASOBI - アイドル (Idol) [Official Music Video]
+✅ Downloaded: YOASOBI - アイドル (Idol) [Official Music Video]
+📊 File size: 3.87 MB
+🎲 Autoplay: Now playing "YOASOBI - アイドル (Idol) [Official Music Video]"
+```
+
+### Usage Tips
+
+- **Random Mode** – Can't decide? Select "Random" to get music from all genres
+- **Queue Priority** – Manually added tracks always play before autoplay suggestions
+- **Toggle Anytime** – Turn autoplay on/off at any point during playback
+- **No Spam** – Only adds one track at a time as each song finishes
+
+---
+
+## 💾 Local Audio Cache System
+
+MusicMaker eliminates playback interruptions by pre-downloading and caching all audio locally before streaming to Discord.
+
+### Why Local Caching?
+
+Traditional Discord bots stream directly from YouTube/Spotify/SoundCloud URLs, which causes:
+- ❌ Random buffering and stuttering during playback
+- ❌ Voice crackling when your ISP throttles streaming sites
+- ❌ Stream failures during Discord voice server load spikes
+- ❌ Quality drops when network conditions fluctuate
+
+**MusicMaker's solution:**
+- ✅ Downloads entire tracks to `audio_cache/` before playback
+- ✅ Streams from local disk at consistent quality
+- ✅ Zero dependency on external stream stability during playback
+- ✅ Instant resume after voice reconnections
+
+### How It Works
+
+1. **Queue Detection** – When you add a track with `/play` or autoplay triggers
+2. **Background Download** – Track downloads silently while previous song plays
+3. **Smart Preloading** – Entire queue preloads in parallel for instant transitions
+4. **Local Streaming** – FFmpeg streams the cached file to Discord voice
+5. **Automatic Cleanup** – Files delete after playback to save disk space
+
+### Console Output Example
+
+```
+⬇️ Pre-downloading: Song Title
+📥 Downloading: Song Title
+✅ Downloaded: Song Title
+📊 File size: 4.23 MB
+✅ Background download completed: Song Title
+🎵 Streaming: Song Title
+♻️ Reusing cached file: Song Title
+▶️ Playing from cache: Song Title
+🗑️ Deleted: track_abc123.opus
+```
+
+### Technical Details
+
+**Cache Directory:**
+- Location: `audio_cache/` (auto-created on first run)
+- Format: Opus audio (`.opus` extension) for optimal Discord voice quality
+- Naming: `track_[MD5 hash].opus` to prevent conflicts
+
+**Download Process:**
+- Uses `youtube-dl-exec` with best audio format selection
+- FFmpeg transcodes to Opus for Discord's native codec
+- Parallel downloads for multiple queued tracks
+- Retry logic for failed downloads with fallback streaming
+
+**Memory Management:**
+- Files persist only during active playback
+- Automatic deletion after track finishes
+- Graceful cleanup on bot shutdown or errors
+- Prevents disk bloat with aggressive pruning
+
+**Performance Benefits:**
+- **Zero mid-song buffering** – entire file ready before playback
+- **Fast skip/seek** – local I/O is instant vs. network round-trip
+- **Reliable autoplay** – pre-cached tracks guarantee smooth transitions
+- **Network resilience** – download failures don't affect current playback
+
+### Disk Space Considerations
+
+Average track sizes:
+- **3-5 minutes:** ~3-8 MB
+- **Queue of 10 tracks:** ~30-80 MB peak usage
+- **Auto-cleanup:** Disk usage drops to ~5-15 MB during playback
+
+The cache system requires minimal disk space and automatically manages itself. For VPS deployments, ensure at least **500 MB free space** for comfortable operation with large queues.
+
+
 
 ---
 
@@ -370,6 +546,5 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
-
 
 

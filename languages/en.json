@@ -252,7 +252,19 @@
     "invalid_selection": "❌ Invalid selection!",
     "processing": "Processing...",
     "adding_song_desc": "Adding **{title}**...",
-    "error_title": "❌ Error"
+    "error_title": "❌ Error",
+    "loop_mode_changed_title": "🔁 Loop Mode Changed",
+    "loop_mode_off": "Loop mode is now **disabled**",
+    "loop_mode_track": "Loop mode set to **track repeat**. The current song will play continuously.",
+    "loop_mode_queue": "Loop mode set to **queue repeat**. The queue will restart when finished.",
+    "changed_by": "👤 Changed by",
+    "autoplay_disabled": "Autoplay Disabled",
+    "autoplay_disabled_desc": "Autoplay feature has been disabled.",
+    "autoplay_select_title": "Select Genre for Autoplay",
+    "autoplay_select_desc": "What genre should play when the queue ends?",
+    "autoplay_select_genre": "Select a music genre...",
+    "autoplay_enabled": "Autoplay Enabled",
+    "autoplay_enabled_desc": "Autoplay enabled for **{genre}** genre. New songs will be added automatically when the queue ends."
   },
   "musicmanager": {
     "playback_ended": "Music Ended",
@@ -267,6 +279,34 @@
     "stop": "Stop",
     "queue": "Queue",
     "shuffle": "Shuffle",
-    "volume": "Volume"
+    "volume": "Volume",
+    "loop": "Loop",
+    "loop_off": "Loop: Off",
+    "loop_track": "Loop: Track",
+    "loop_queue": "Loop: Queue",
+    "autoplay_off": "Autoplay: Off",
+    "autoplay_on": "Autoplay: On"
+  },
+  "genres": {
+    "pop": "Pop",
+    "rock": "Rock",
+    "hiphop": "Hip-Hop",
+    "electronic": "Electronic",
+    "jazz": "Jazz",
+    "classical": "Classical",
+    "metal": "Metal",
+    "country": "Country",
+    "rnb": "R&B",
+    "indie": "Indie",
+    "latin": "Latin",
+    "kpop": "K-Pop",
+    "anime": "Anime",
+    "lofi": "Lo-Fi",
+    "blues": "Blues",
+    "reggae": "Reggae",
+    "disco": "Disco",
+    "punk": "Punk",
+    "ambient": "Ambient",
+    "random": "Random"
   }
 }

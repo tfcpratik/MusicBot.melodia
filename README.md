@@ -45,13 +45,14 @@
 4. [Quick Start](#quick-start)
 5. [Configuration](#configuration)
 6. [Spotify API Setup](#spotify-api-setup)
-7. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
-8. [Slash Commands & Controls](#slash-commands--controls)
-9. [Language Support](#language-support)
-10. [Deployment Tips](#deployment-tips)
-11. [Troubleshooting](#troubleshooting)
-12. [Privacy & Legal](#privacy--legal)
-13. [Contributing](#contributing)
+7. [Genius API Setup](#genius-api-setup-optionally)
+8. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
+9. [Slash Commands & Controls](#slash-commands--controls)
+10. [Language Support](#language-support)
+11. [Deployment Tips](#deployment-tips)
+12. [Troubleshooting](#troubleshooting)
+13. [Privacy & Legal](#privacy--legal)
+14. [Contributing](#contributing)
 
 ---
 
@@ -185,7 +186,7 @@ Without these credentials Spotify requests fall back to zero results.
 
 ---
 
-## Genius API Setup (Optional)
+## Genius API Setup (Optionally)
 
 MusicMaker uses **web scraping** by default to fetch lyrics from Genius—no API key required! However, if you want **higher rate limits** and **faster responses**, you can optionally add Genius API credentials.
 
@@ -591,6 +592,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

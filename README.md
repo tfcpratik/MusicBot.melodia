@@ -12,6 +12,7 @@
 | 💾 Local Audio Cache | All tracks are pre-downloaded and cached locally to eliminate stream interruptions, network lag, and voice crackling—delivering buffer-free playback even during peak Discord load or ISP throttling. |
 | 🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
+| 📜 Static Lyrics | Fetches lyrics from Genius (web scraping) with LRCLIB fallback—button-only display with pagination support. |
 | ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |generation Discord music bot crafted with **discord.js v14**, engineered for cinematic embeds, lossless playback, and frictionless control across desktop and mobile.
 
 ![GitHub Stars](https://img.shields.io/github/stars/umutxyp/musicbot?style=social)
@@ -63,6 +64,7 @@
 | � Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
 | �🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
+| 📜 Static Lyrics | Genius API integration with automatic web scraping fallback, LRCLIB as secondary source—all lyrics displayed via button with pagination. |
 | ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |
 
 ---
@@ -145,6 +147,8 @@ CLIENT_ID=your_application_id
 GUILD_ID=optional_guild_for_fast_testing
 SPOTIFY_CLIENT_ID=spotify_client_id
 SPOTIFY_CLIENT_SECRET=spotify_client_secret
+GENIUS_CLIENT_ID=optional_genius_client_id
+GENIUS_CLIENT_SECRET=optional_genius_client_secret
 STATUS=🎵 MusicMaker | /play
 EMBED_COLOR=#FF6B6B
 SUPPORT_SERVER=https://discord.gg/ACJQzJuckW
@@ -162,6 +166,7 @@ WEBSITE=https://musicmaker.vercel.app
 | `bot.embedColor` | `.env`/`config.js` | Hex color for all embeds. |
 | `bot.supportServer` & `bot.website` | `.env`/`config.js` | Populates help links and README badges. |
 | `spotify.clientId` & `spotify.clientSecret` | `.env`/`config.js` | Enables Spotify search, playlist and album expansion. |
+| `genius.clientId` & `genius.clientSecret` | `.env`/`config.js` | Optional Genius API credentials for higher rate limits (works without via web scraping). |
 
 > 🔐 Never commit `.env` to source control. Use deployment secrets in your hosting provider or create environment variables at runtime.
 
@@ -177,6 +182,44 @@ WEBSITE=https://musicmaker.vercel.app
 6. Restart the bot. The credentials are cached and refreshed automatically with the client credentials grant.
 
 Without these credentials Spotify requests fall back to zero results.
+
+---
+
+## Genius API Setup (Optional)
+
+MusicMaker uses **web scraping** by default to fetch lyrics from Genius—no API key required! However, if you want **higher rate limits** and **faster responses**, you can optionally add Genius API credentials.
+
+### Why Use Genius API?
+
+| Without API Key | With API Key |
+| --- | --- |
+| ✅ Works perfectly via web scraping | ✅ Higher rate limits |
+| ✅ No registration needed | ✅ Faster response times |
+| ⚠️ May hit rate limits on heavy use | ✅ Official API support |
+
+### Setup Steps
+
+1. Visit the [Genius API Clients Page](https://genius.com/api-clients), sign in with your Genius account (or create one).
+2. Click **New API Client** and fill in:
+   - **App Name:** `MusicMaker Bot` (or any name)
+   - **App Website URL:** `https://localhost` (placeholder is fine)
+   - **Redirect URI:** `https://localhost/callback` (not used, but required)
+3. Click **Save** and reveal your **Client ID** and **Client Secret**.
+4. Copy both values and add them to your `.env`:
+   ```dotenv
+   GENIUS_CLIENT_ID=your_genius_client_id
+   GENIUS_CLIENT_SECRET=your_genius_client_secret
+   ```
+5. Restart the bot. The Genius client will now use API authentication.
+
+> 💡 **Note:** Even without credentials, lyrics work perfectly! The bot automatically scrapes Genius.com and falls back to LRCLIB if needed.
+
+### Lyrics Priority
+
+The bot fetches lyrics in this order:
+1. **Genius** (with API key if provided, otherwise web scraping)
+2. **LRCLIB** (free lyrics database)
+3. If both fail, no lyrics button appears
 
 ---
 
@@ -523,6 +566,7 @@ Add your own by copying `languages/en.json`, translating strings, and restarting
 | Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
 | Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
 | Buttons stop working mid-song | Interactions expire after Discord’s cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
+| Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
 | Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
 
 ---

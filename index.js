@@ -4,6 +4,8 @@ const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
 const config = require('./config');
+const PlayerStateManager = require('./src/PlayerStateManager');
+const MusicPlayer = require('./src/MusicPlayer');
 const chalk = require('chalk');
 
 require("./src/commandLoader"); // Load and deploy commands
@@ -11,35 +13,96 @@ require("./src/commandLoader"); // Load and deploy commands
 // Clean up audio cache directory on startup
 async function cleanupAudioCache() {
     const cacheDir = path.join(__dirname, 'audio_cache');
-    
+
     try {
         if (fs.existsSync(cacheDir)) {
             const files = await fsPromises.readdir(cacheDir);
+            const protectedFiles = PlayerStateManager.getProtectedCacheFiles();
             
+            let deletedCount = 0;
+            let skippedCount = 0;
+
             for (const file of files) {
+                const absolutePath = path.join(cacheDir, file);
+
+                if (protectedFiles.has(path.resolve(absolutePath))) {
+                    skippedCount++;
+                    continue;
+                }
+
                 try {
-                    await fsPromises.unlink(path.join(cacheDir, file));
+                    await fsPromises.unlink(absolutePath);
+                    deletedCount++;
                 } catch (err) {
                     console.error(chalk.red(`❌ Failed to delete ${file}:`), err.message);
                 }
             }
-            
-            console.log(chalk.green(`✅ Cleaned up ${files.length} cached audio files from previous session`));
         } else {
             fs.mkdirSync(cacheDir, { recursive: true });
-            console.log(chalk.cyan('📁 Created audio cache directory'));
         }
     } catch (error) {
         console.error(chalk.red('❌ Failed to cleanup audio cache:'), error.message);
     }
 }
 
-// Run cleanup before starting the bot
-cleanupAudioCache().then(() => {
-    console.log(chalk.cyan('🎵 Starting music bot...'));
-});
+async function restoreSavedPlayers(client) {
+    const savedStates = PlayerStateManager.getAllStates();
+    const entries = Object.entries(savedStates || {});
+    if (entries.length === 0) return;
 
+    for (const [guildId, state] of entries) {
+        try {
+            const guild = client.guilds.cache.get(guildId) || await client.guilds.fetch(guildId).catch(() => null);
+            if (!guild) {
+                await PlayerStateManager.removeState(guildId);
+                continue;
+            }
 
+            const voiceChannelId = state.voiceChannelId;
+            const textChannelId = state.textChannelId;
+
+            if (!voiceChannelId || !textChannelId) {
+                await PlayerStateManager.removeState(guildId);
+                continue;
+            }
+
+            let voiceChannel = guild.channels.cache.get(voiceChannelId) || null;
+            if (!voiceChannel) {
+                voiceChannel = await guild.channels.fetch(voiceChannelId).catch(() => null);
+            }
+
+            let textChannel = guild.channels.cache.get(textChannelId) || null;
+            if (!textChannel) {
+                textChannel = await guild.channels.fetch(textChannelId).catch(() => null);
+            }
+
+            const isVoiceValid = voiceChannel && typeof voiceChannel.isVoiceBased === 'function' && voiceChannel.isVoiceBased();
+            const isTextValid = textChannel && typeof textChannel.isTextBased === 'function' && textChannel.isTextBased();
+
+            if (!isVoiceValid || !isTextValid) {
+                await PlayerStateManager.removeState(guildId);
+                continue;
+            }
+
+            const player = new MusicPlayer(guild, textChannel, voiceChannel);
+            client.players.set(guildId, player);
+
+            try {
+                await player.restoreFromState(state);
+            } catch (error) {
+                console.error(chalk.red(`❌ Failed to restore music session for guild ${guild.name} (${guildId}):`), error);
+                client.players.delete(guildId);
+                player.cleanup();
+                await PlayerStateManager.removeState(guildId);
+            }
+        } catch (error) {
+            console.error(chalk.red(`❌ Error during session restoration for guild ${guildId}:`), error);
+            await PlayerStateManager.removeState(guildId);
+        }
+    }
+}
+
+// Don't cleanup audio cache yet - wait until after we check saved states
 setTimeout(() => {
     const client = new Client({
         intents: [
@@ -146,6 +209,10 @@ setTimeout(() => {
 
         // Set bot activity
         setInterval(() => client.user.setActivity({ name: `${config.bot.status}`, type: ActivityType.Listening }), 10000);
+
+        // FIRST restore players (this populates protected files), THEN cleanup cache
+        await restoreSavedPlayers(client);
+        await cleanupAudioCache();
     });
 
     // Handle interactions (slash commands)
@@ -174,43 +241,94 @@ setTimeout(() => {
         }
     });
 
-    // Handle voice state updates for auto-disconnect
-    client.on(Events.VoiceStateUpdate, (oldState, newState) => {
-        // Auto-disconnect when bot is alone in voice channel AND not playing music
-        if (oldState.channelId && oldState.guild.members.me.voice.channelId === oldState.channelId) {
-            const channel = oldState.guild.channels.cache.get(oldState.channelId);
-            if (channel && channel.members.filter(m => !m.user.bot).size === 0) {
-                // Only bot left in channel, check if music is playing
-                const player = client.players.get(oldState.guild.id);
+    // Handle voice state updates for pause/resume and cleanup
+    client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+        const guild = oldState.guild;
+        const player = client.players.get(guild.id);
+        if (!player) return;
 
-                // If no player or no current track, disconnect after 30 seconds
-                if (!player || !player.currentTrack) {
-                    setTimeout(() => {
-                        // Double-check: still alone AND still no music?
-                        const currentChannel = oldState.guild.channels.cache.get(oldState.channelId);
-                        const currentPlayer = client.players.get(oldState.guild.id);
+        const botMember = guild.members.me;
+        const botId = botMember?.id ?? client.user.id;
+        const involvesBot = oldState.id === botId || newState.id === botId;
 
-                        if (currentChannel &&
-                            currentChannel.members.filter(m => !m.user.bot).size === 0 &&
-                            (!currentPlayer || !currentPlayer.currentTrack)) {
+        if (involvesBot) {
+            const oldChannelId = oldState.channelId;
+            const newChannelId = newState.channelId;
 
-                            const connection = getVoiceConnection(oldState.guild.id);
-                            if (connection && connection.state.status !== 'destroyed') {
-                                if (currentPlayer) {
-                                    currentPlayer.stop();
-                                    client.players.delete(oldState.guild.id);
-                                }
+            if (oldChannelId && !newChannelId) {
+                try {
+                    const embedManager = client.musicEmbedManager || global.clients?.musicEmbedManager;
 
-                                try {
-                                    connection.destroy();
-                                } catch (error) {
-                                    console.log('🔌 Connection already destroyed');
-                                }
-                            }
-                        } else {
-                        }
-                    }, 30000);
-                } else {
+                    // Mark state as ended so UI reflects the change
+                    player.pendingEndReason = 'forced-disconnect';
+                    player.queue = [];
+                    player.currentTrack = null;
+
+                    if (embedManager) {
+                        await embedManager.handlePlaybackEnd(player);
+                    } else if (typeof player.showQueueCompleted === 'function') {
+                        await player.showQueueCompleted();
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to update playback UI after forced disconnect:', error);
+                } finally {
+                    player.cleanup();
+                    client.players.delete(guild.id);
+                }
+                return;
+            }
+
+            if (newChannelId && oldChannelId !== newChannelId) {
+                if (newState.channel) {
+                    await player.moveToChannel(newState.channel);
+                    player.clearInactivityTimer(false);
+                    if (client.musicEmbedManager) {
+                        await client.musicEmbedManager.updateNowPlayingEmbed(player);
+                    }
+                }
+            }
+
+            const wasMuted = oldState.serverMute || oldState.serverDeaf || oldState.suppress;
+            const isMuted = newState.serverMute || newState.serverDeaf || newState.suppress;
+
+            if (!wasMuted && isMuted) {
+                const paused = player.pauseFor('mute');
+                if (paused && client.musicEmbedManager) {
+                    await client.musicEmbedManager.updateNowPlayingEmbed(player);
+                }
+            } else if (wasMuted && !isMuted) {
+                const resumed = player.resumeFor('mute');
+                if (client.musicEmbedManager && (resumed || !player.pauseReasons.has('mute'))) {
+                    await client.musicEmbedManager.updateNowPlayingEmbed(player);
+                }
+            }
+        }
+
+        const voiceChannelId = player.voiceChannel?.id;
+        if (!voiceChannelId) return;
+
+        if (oldState.channelId === voiceChannelId || newState.channelId === voiceChannelId) {
+            const channel = guild.channels.cache.get(voiceChannelId);
+
+            if (!channel) {
+                player.cleanup();
+                client.players.delete(guild.id);
+                return;
+            }
+
+            const listeners = channel.members.filter(member => !member.user.bot).size;
+
+            if (listeners === 0) {
+                const alreadyPaused = player.pauseReasons.has('alone');
+                player.startInactivityTimer();
+                if (!alreadyPaused && client.musicEmbedManager && player.currentTrack) {
+                    await client.musicEmbedManager.updateNowPlayingEmbed(player);
+                }
+            } else {
+                const wasPausedForAlone = player.pauseReasons.has('alone');
+                player.clearInactivityTimer(true);
+                if (wasPausedForAlone && client.musicEmbedManager && player.currentTrack) {
+                    await client.musicEmbedManager.updateNowPlayingEmbed(player);
                 }
             }
         }
@@ -303,6 +421,41 @@ setTimeout(() => {
             // Load commands and events
             loadCommands();
             loadEvents();
+
+            // Graceful shutdown handler
+            const gracefulShutdown = async (signal) => {
+                // Save all active player states before shutdown
+                const savePromises = [];
+                for (const [guildId, player] of client.players) {
+                    if (player && typeof player.persistState === 'function') {
+                         // Use immediate=true to bypass debouncing
+                        savePromises.push(player.persistState('shutdown', true).catch(err => {
+                            console.error(chalk.red(`Failed to save state for guild ${guildId}:`), err);
+                        }));
+                    }
+                }
+                
+                await Promise.all(savePromises);
+                // Give time for saves to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                process.exit(0);
+            };
+
+            // Register shutdown handlers
+            process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+            process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+            
+            // Windows specific handlers
+            if (process.platform === 'win32') {
+                const readline = require('readline');
+                if (process.stdin.isTTY) {
+                    readline.createInterface({
+                        input: process.stdin,
+                        output: process.stdout
+                    }).on('SIGINT', () => gracefulShutdown('SIGINT'));
+                }
+            }
 
             // Login to Discord
             await client.login(config.discord.token);

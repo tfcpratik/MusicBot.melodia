@@ -13,7 +13,9 @@
       "error": "❌ Sproget kunne ikke ændres!",
       "error2": "❌ Der opstod en fejl under behandling af kommandoen!",
       "errortitle": "❌ Fejl",
-      "changed_desc": "Serversprog er sat til **{language}**!"
+      "changed_desc": "Serversprog er sat til **{language}**!",
+      "permission_required": "❌ Du skal have **Administrer server**-tilladelsen for at bruge denne kommando!",
+      "permission_required_button": "❌ Du skal have **Administrer server**-tilladelsen for at bruge denne knap!"
     },
     "help": {
       "title": "🎵 Musik Bot Hjælp",
@@ -198,10 +200,11 @@
     "same_channel_required": "❌ Du skal være i samme stemmekanal som botten!",
     "invalid_volume": "❌ Lydstyrken skal være et tal mellem 0-100!",
     "volume_changed_title": "🔊 Lydstyrke Ændret",
-    "volume_changed_desc": "Lydstyrken er sat til **{volume}%**!",
-    "set_by": "👤 Sat af",
+    "volume_changed_desc": "Lydstyrke er sat til **{volume}%**!",
+    "set_by": "👤 Indstillet af",
     "level": "📊 Niveau",
-    "volume_error": "❌ Lydstyrken kunne ikke indstilles!"
+    "volume_error": "❌ Lydstyrken kunne ikke indstilles!",
+    "not_authorized": "❌ Du har ikke tilladelse til at kontrollere musikken."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Du skal være i en stemmekanal!",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Hvilken genre skal afspilles, når køen er tom?",
     "autoplay_select_genre": "Vælg en musikgenre...",
     "autoplay_enabled": "🎲 Automatisk Afspilning Aktiveret",
-    "autoplay_enabled_desc": "Genre: **{genre}**"
+    "autoplay_enabled_desc": "Genre: **{genre}**",
+    "no_lyrics_found": "Ingen sangtekster fundet til denne sang.",
+    "lyrics_unavailable": "Sangtekster er ikke tilgængelige.",
+    "lyrics_title": "Sangtekst",
+    "lyrics_error": "Kunne ikke indlæse sangtekster. Prøv igen senere."
   },
   "musicmanager": {
     "playback_ended": "Musik Slut",
     "queue_empty": "Alle sange er blevet afspillet! Brug kommandoen `/play` for at tilføje ny musik.",
     "playlist_added_to_queue": "✅ {count} sange fra playlisten tilføjet til køen!",
-    "track_added_to_queue": "✅ **{title}** tilføjet til køen!"
+    "track_added_to_queue": "✅ **{title}** tilføjet til køen!",
+    "control_permission_info": "🔐 Kontrolelementer: Kun Administrer Server tilladelse, DJ rolle eller musikstarter (Kø-knappen er offentlig)"
   },
   "buttons": {
     "pause": "Pause",
@@ -285,7 +293,8 @@
     "loop_track": "Gentag: Sang",
     "loop_queue": "Gentag: Kø",
     "autoplay_off": "Auto: Fra",
-    "autoplay_on": "Auto: Til"
+    "autoplay_on": "Auto: Til",
+    "lyrics": "Tekst"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Tilfældig"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Kontroltilladelser",
+    "music_control_requirement": "For at administrere musik skal du være den person, der startede den, eller have Administrer Server-tilladelse, eller have en rolle ved navn DJ."
   }
 }

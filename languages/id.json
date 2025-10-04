@@ -13,7 +13,9 @@
       "error": "❌ Bahasa tidak dapat diubah!",
       "error2": "❌ Terjadi kesalahan saat memproses perintah!",
       "errortitle": "❌ Kesalahan",
-      "changed_desc": "Bahasa server telah diatur ke **{language}**!"
+      "changed_desc": "Bahasa server telah diatur ke **{language}**!",
+      "permission_required": "❌ Kamu harus memiliki izin **Kelola Server** untuk menggunakan perintah ini!",
+      "permission_required_button": "❌ Kamu harus memiliki izin **Kelola Server** untuk menggunakan tombol ini!"
     },
     "help": {
       "title": "🎵 Bantuan Bot Musik",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Volume telah diatur ke **{volume}%**!",
     "set_by": "👤 Diatur oleh",
     "level": "📊 Level",
-    "volume_error": "❌ Volume tidak dapat diatur!"
+    "volume_error": "❌ Volume tidak dapat diatur!",
+    "not_authorized": "❌ Kamu tidak memiliki izin untuk mengelola kontrol musik."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Anda harus berada di channel suara!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Tombol ini tidak lagi valid! Sistem musik telah dimulai ulang.",
     "unknown_interaction": "❌ Interaksi tidak diketahui!",
     "processing_error": "❌ Terjadi kesalahan saat pemrosesan!",
-    "not_authorized": "❌ Hanya pengguna resmi dan orang yang memulai musik dapat menggunakan tombol ini!",
+    "not_authorized": "❌ Kamu tidak memiliki izin untuk mengelola kontrol musik.",
     "no_song_playing": "❌ Tidak ada lagu yang sedang diputar saat ini!",
     "operation_failed": "❌ Operasi gagal!",
     "music_paused": "Musik Dijeda",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Genre apa yang harus diputar saat antrian berakhir?",
     "autoplay_select_genre": "Pilih genre musik...",
     "autoplay_enabled": "🎲 Pemutaran Otomatis Diaktifkan",
-    "autoplay_enabled_desc": "Genre: **{genre}**"
+    "autoplay_enabled_desc": "Genre: **{genre}**",
+    "no_lyrics_found": "Lirik tidak ditemukan untuk lagu ini.",
+    "lyrics_unavailable": "Lirik tidak tersedia.",
+    "lyrics_title": "Lirik Lagu",
+    "lyrics_error": "Gagal memuat lirik. Silakan coba lagi nanti."
   },
   "musicmanager": {
     "playback_ended": "Musik Berakhir",
     "queue_empty": "Semua lagu telah diputar! Gunakan perintah `/play` untuk menambahkan musik baru.",
     "playlist_added_to_queue": "✅ {count} lagu dari playlist ditambahkan ke antrian!",
-    "track_added_to_queue": "✅ **{title}** ditambahkan ke antrian!"
+    "track_added_to_queue": "✅ **{title}** ditambahkan ke antrian!",
+    "control_permission_info": "🔐 Kontrol: Hanya izin Kelola Server, peran DJ atau pemulai musik (Tombol antrian bersifat publik)"
   },
   "buttons": {
     "pause": "Jeda",
@@ -285,7 +293,8 @@
     "loop_track": "Ulangi: Lagu",
     "loop_queue": "Ulangi: Antrian",
     "autoplay_off": "Auto: Mati",
-    "autoplay_on": "Auto: Aktif"
+    "autoplay_on": "Auto: Aktif",
+    "lyrics": "Lirik"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Acak"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Izin kontrol",
+    "music_control_requirement": "Untuk mengelola musik kamu harus menjadi orang yang memulainya, memiliki izin Kelola Server, atau memiliki peran bernama DJ."
   }
 }

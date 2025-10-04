@@ -13,7 +13,9 @@
       "error": "❌ Språket kunne ikke endres!",
       "error2": "❌ En feil oppstod under behandling av kommandoen!",
       "errortitle": "❌ Feil",
-      "changed_desc": "Serverspråket er satt til **{language}**!"
+      "changed_desc": "Serverspråket er satt til **{language}**!",
+      "permission_required": "❌ Du må ha tillatelsen **Administrer server** for å bruke denne kommandoen!",
+      "permission_required_button": "❌ Du må ha tillatelsen **Administrer server** for å bruke denne knappen!"
     },
     "help": {
       "title": "🎵 Musikkbot Hjelp",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Volumet er satt til **{volume}%**!",
     "set_by": "👤 Satt av",
     "level": "📊 Nivå",
-    "volume_error": "❌ Volumet kunne ikke settes!"
+    "volume_error": "❌ Volumet kunne ikke settes!",
+    "not_authorized": "❌ Du har ikke tillatelse til å styre musikken."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Du må være i en talekanal!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Denne knappen er ikke lenger gyldig! Musikksystemet har blitt startet på nytt.",
     "unknown_interaction": "❌ Ukjent interaksjon!",
     "processing_error": "❌ En feil oppstod under behandling!",
-    "not_authorized": "❌ Bare autoriserte brukere og personen som startet musikken kan bruke denne knappen!",
+    "not_authorized": "❌ Du har ikke tillatelse til å styre musikken.",
     "no_song_playing": "❌ Ingen sang spilles for øyeblikket!",
     "operation_failed": "❌ Operasjonen mislyktes!",
     "music_paused": "Musikk Pauset",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Hvilken genre skal spilles når køen er tom?",
     "autoplay_select_genre": "Velg en musikkgenre...",
     "autoplay_enabled": "🎲 Automatisk avspilling aktivert",
-    "autoplay_enabled_desc": "Sjanger: **{genre}**"
+    "autoplay_enabled_desc": "Sjanger: **{genre}**",
+    "no_lyrics_found": "Ingen sangtekster funnet for denne sangen.",
+    "lyrics_unavailable": "Sangtekster er ikke tilgjengelige.",
+    "lyrics_title": "Sangtekst",
+    "lyrics_error": "Kunne ikke laste sangtekster. Prøv igjen senere."
   },
   "musicmanager": {
     "playback_ended": "Musikk Avsluttet",
     "queue_empty": "Alle sanger har blitt spilt! Bruk `/play`-kommandoen for å legge til ny musikk.",
     "playlist_added_to_queue": "✅ {count} sanger fra spillelisten lagt til i køen!",
-    "track_added_to_queue": "✅ **{title}** lagt til i køen!"
+    "track_added_to_queue": "✅ **{title}** lagt til i køen!",
+    "control_permission_info": "🔐 Kontroller: Kun Administrer server tillatelse, DJ rolle eller musikkstarter (Kø-knappen er offentlig)"
   },
   "buttons": {
     "pause": "Pause",
@@ -285,7 +293,8 @@
     "loop_track": "Gjenta: Spør",
     "loop_queue": "Gjenta: Kø",
     "autoplay_off": "Auto: Av",
-    "autoplay_on": "Auto: På"
+    "autoplay_on": "Auto: På",
+    "lyrics": "Tekst"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Tilfeldig"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Kontrolltillatelser",
+    "music_control_requirement": "For å administrere musikken må du være den som startet den, ha tillatelsen Administrer server eller ha en rolle som heter DJ."
   }
 }

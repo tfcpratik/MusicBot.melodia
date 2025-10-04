@@ -13,7 +13,9 @@
       "error": "❌ Język nie mógł zostać zmieniony!",
       "error2": "❌ Wystąpił błąd podczas przetwarzania polecenia!",
       "errortitle": "❌ Błąd",
-      "changed_desc": "Język serwera został ustawiony na **{language}**!"
+      "changed_desc": "Język serwera został ustawiony na **{language}**!",
+      "permission_required": "❌ Aby użyć tej komendy, musisz mieć uprawnienie **Zarządzanie serwerem**!",
+      "permission_required_button": "❌ Aby użyć tego przycisku, musisz mieć uprawnienie **Zarządzanie serwerem**!"
     },
     "help": {
       "title": "🎵 Pomoc Bota Muzycznego",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Głośność została ustawiona na **{volume}%**!",
     "set_by": "👤 Ustawione przez",
     "level": "📊 Poziom",
-    "volume_error": "❌ Głośność nie mogła zostać ustawiona!"
+    "volume_error": "❌ Głośność nie mogła zostać ustawiona!",
+    "not_authorized": "❌ Nie masz uprawnień do zarządzania kontrolą muzyki."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Musisz być na kanale głosowym!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Ten przycisk nie jest już prawidłowy! System muzyczny został ponownie uruchomiony.",
     "unknown_interaction": "❌ Nieznana interakcja!",
     "processing_error": "❌ Wystąpił błąd podczas przetwarzania!",
-    "not_authorized": "❌ Tylko autoryzowani użytkownicy i osoba, która rozpoczęła muzykę, mogą używać tego przycisku!",
+    "not_authorized": "❌ Nie masz uprawnień do zarządzania kontrolą muzyki.",
     "no_song_playing": "❌ Obecnie nie jest odtwarzana żadna piosenka!",
     "operation_failed": "❌ Operacja nie powiodła się!",
     "music_paused": "Muzyka Wstrzymana",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Jaki gatunek ma być odtwarzany, gdy kolejka się skończy?",
     "autoplay_select_genre": "Wybierz gatunek muzyczny...",
     "autoplay_enabled": "🎲 Automatyczne odtwarzanie włączone",
-    "autoplay_enabled_desc": "Gatunek: **{genre}**"
+    "autoplay_enabled_desc": "Gatunek: **{genre}**",
+    "no_lyrics_found": "Nie znaleziono tekstu dla tej piosenki.",
+    "lyrics_unavailable": "Tekst nie jest dostępny.",
+    "lyrics_title": "Tekst piosenki",
+    "lyrics_error": "Nie udało się załadować tekstu. Spróbuj ponownie później."
   },
   "musicmanager": {
     "playback_ended": "Muzyka Zakończona",
     "queue_empty": "Wszystkie piosenki zostały odtworzone! Użyj polecenia `/play`, aby dodać nową muzykę.",
     "playlist_added_to_queue": "✅ {count} piosenek z playlisty dodanych do kolejki!",
-    "track_added_to_queue": "✅ **{title}** dodane do kolejki!"
+    "track_added_to_queue": "✅ **{title}** dodane do kolejki!",
+    "control_permission_info": "🔐 Sterowanie: Tylko uprawnienie Zarządzaj serwerem, rola DJ lub starter muzyki (Przycisk kolejki jest publiczny)"
   },
   "buttons": {
     "pause": "Pauza",
@@ -285,7 +293,8 @@
     "loop_track": "Pętla: Utwór",
     "loop_queue": "Pętla: Kolejka",
     "autoplay_off": "Auto: Wyłączone",
-    "autoplay_on": "Auto: Włączone"
+    "autoplay_on": "Auto: Włączone",
+    "lyrics": "Tekst"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Losowy"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Uprawnienia kontroli",
+    "music_control_requirement": "Aby zarządzać muzyką, musisz być osobą, która ją uruchomiła, mieć uprawnienie Zarządzanie serwerem lub posiadać rolę o nazwie DJ."
   }
 }

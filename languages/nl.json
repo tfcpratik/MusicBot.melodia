@@ -13,7 +13,9 @@
       "error": "❌ Taal kon niet worden gewijzigd!",
       "error2": "❌ Er is een fout opgetreden bij het verwerken van de opdracht!",
       "errortitle": "❌ Fout",
-      "changed_desc": "Servertaal is ingesteld op **{language}**!"
+      "changed_desc": "Servertaal is ingesteld op **{language}**!",
+      "permission_required": "❌ Je hebt de machtiging **Server beheren** nodig om dit commando te gebruiken!",
+      "permission_required_button": "❌ Je hebt de machtiging **Server beheren** nodig om deze knop te gebruiken!"
     },
     "help": {
       "title": "🎵 Muziekbot Hulp",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Het volume is ingesteld op **{volume}%**!",
     "set_by": "👤 Ingesteld door",
     "level": "📊 Niveau",
-    "volume_error": "❌ Het volume kon niet worden ingesteld!"
+    "volume_error": "❌ Het volume kon niet worden ingesteld!",
+    "not_authorized": "❌ Je mag de muziekbediening niet beheren."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Je moet in een spraakkanaal zijn!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Deze knop is niet meer geldig! Het muzieksysteem is opnieuw opgestart.",
     "unknown_interaction": "❌ Onbekende interactie!",
     "processing_error": "❌ Er is een fout opgetreden tijdens de verwerking!",
-    "not_authorized": "❌ Alleen geautoriseerde gebruikers en degene die de muziek startte kunnen deze knop gebruiken!",
+    "not_authorized": "❌ Je mag de muziekbediening niet beheren.",
     "no_song_playing": "❌ Er wordt momenteel geen nummer afgespeeld!",
     "operation_failed": "❌ Operatie mislukt!",
     "autoplay_disabled": "🎲 Automatisch Afspelen Uitgeschakeld",
@@ -264,13 +267,18 @@
     "loop_mode_off": "Herhaalmodus is nu **uitgeschakeld**",
     "loop_mode_track": "Herhaalmodus ingesteld op **nummer herhalen**. Het huidige nummer wordt continu afgespeeld.",
     "loop_mode_queue": "Herhaalmodus ingesteld op **wachtrij herhalen**. De wachtrij herstart wanneer deze klaar is.",
-    "changed_by": "👤 Gewijzigd door"
+    "changed_by": "👤 Gewijzigd door",
+    "no_lyrics_found": "Geen songteksten gevonden voor dit nummer.",
+    "lyrics_unavailable": "Songteksten zijn niet beschikbaar.",
+    "lyrics_title": "Songtekst",
+    "lyrics_error": "Songteksten konden niet worden geladen. Probeer het later opnieuw."
   },
   "musicmanager": {
     "playback_ended": "Muziek Beëindigd",
     "queue_empty": "Alle nummers zijn afgespeeld! Gebruik het `/play` commando om nieuwe muziek toe te voegen.",
     "playlist_added_to_queue": "✅ {count} nummers uit de afspeellijst toegevoegd aan de wachtrij!",
-    "track_added_to_queue": "✅ **{title}** toegevoegd aan de wachtrij!"
+    "track_added_to_queue": "✅ **{title}** toegevoegd aan de wachtrij!",
+    "control_permission_info": "🔐 Besturing: Alleen Server beheren toestemming, DJ rol of muziekstarter (Wachtrij knop is openbaar)"
   },
   "buttons": {
     "pause": "Pauzeren",
@@ -285,7 +293,8 @@
     "loop_track": "Herhalen: Track",
     "loop_queue": "Herhalen: Wachtrij",
     "autoplay_off": "Auto: Uit",
-    "autoplay_on": "Auto: Aan"
+    "autoplay_on": "Auto: Aan",
+    "lyrics": "Tekst"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Willekeurig"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Bedieningstoestemmingen",
+    "music_control_requirement": "Om de muziek te beheren moet je degene zijn die deze is gestart, de machtiging Server beheren hebben of een rol met de naam DJ hebben."
   }
 }

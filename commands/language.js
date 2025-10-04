@@ -18,7 +18,7 @@ module.exports = {
             // Check if user has MANAGE_GUILD permission
             if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
                 const noPermissionTitle = await LanguageManager.getTranslation(interaction.guild.id, 'commands.language.errortitle');
-                const noPermissionDesc = '❌ Bu komutu kullanmak için **Sunucuyu Yönet** yetkisine sahip olmalısın!';
+                const noPermissionDesc = await LanguageManager.getTranslation(interaction.guild.id, 'commands.language.permission_required');
                 
                 const errorEmbed = new EmbedBuilder()
                     .setTitle(noPermissionTitle)

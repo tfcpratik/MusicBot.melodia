@@ -251,15 +251,45 @@ class MusicEmbedManager {
             });
         }
 
+        // Status
+        const statusLabel = await LanguageManager.getTranslation(guildId, 'commands.nowplaying.status');
+        const statusKey = player.paused
+            ? 'commands.nowplaying.status_paused'
+            : 'commands.nowplaying.status_playing';
+        let statusValue = await LanguageManager.getTranslation(guildId, statusKey);
+
+        if (player.pauseReasons && player.pauseReasons.has('mute')) {
+            statusValue += ' 🔇';
+        } else if (player.pauseReasons && player.pauseReasons.has('alone')) {
+            statusValue += ' ⏳';
+        }
+
+        embed.addFields({
+            name: statusLabel,
+            value: statusValue,
+            inline: true
+        });
+
         // Thumbnail
         if (track.thumbnail) {
             embed.setThumbnail(track.thumbnail);
         }
 
-        // Queue info in footer
+        // Permission info and Queue info in footer
+        const footerParts = [];
+        
+        // Add permission info
+        const permissionInfo = await LanguageManager.getTranslation(guildId, 'musicmanager.control_permission_info');
+        footerParts.push(permissionInfo);
+        
+        // Add queue info if available
         if (player.queue.length > 0) {
-            const footerText = await LanguageManager.getTranslation(guildId, 'commands.play.more_songs_in_queue', { count: player.queue.length });
-            embed.setFooter({ text: footerText });
+            const queueInfo = await LanguageManager.getTranslation(guildId, 'commands.play.more_songs_in_queue', { count: player.queue.length });
+            footerParts.push(queueInfo);
+        }
+        
+        if (footerParts.length > 0) {
+            embed.setFooter({ text: footerParts.join(' • ') });
         }
 
         return embed;
@@ -317,14 +347,41 @@ class MusicEmbedManager {
             }
         }
 
-        // Müzik bittiği embed'i gönder
-        const endEmbed = new EmbedBuilder()
-            .setTitle('🎵 ' + await LanguageManager.getTranslation(player.guild.id, 'musicmanager.playback_ended'))
-            .setDescription(await LanguageManager.getTranslation(player.guild.id, 'musicmanager.queue_empty'))
-            .setColor('#FF6B6B')
-            .setTimestamp();
+        let endEmbed = null;
+        const guildId = player.guild?.id;
 
-        await player.textChannel.send({ embeds: [endEmbed] });
+        try {
+            const title = guildId
+                ? await LanguageManager.getTranslation(guildId, 'musicmanager.playback_ended')
+                : 'Playback Ended';
+            const description = guildId
+                ? await LanguageManager.getTranslation(guildId, 'musicmanager.queue_empty')
+                : 'Queue is now empty.';
+
+            endEmbed = new EmbedBuilder()
+                .setTitle(`🎵 ${title}`)
+                .setDescription(description)
+                .setColor('#FF6B6B')
+                .setTimestamp();
+        } catch (error) {
+            console.error('Error preparing playback end embed:', error);
+        }
+
+        if (!endEmbed) {
+            endEmbed = new EmbedBuilder()
+                .setDescription('🎵 Playback ended')
+                .setColor('#FF6B6B')
+                .setTimestamp();
+        }
+
+        const textChannel = player.textChannel;
+        if (textChannel && typeof textChannel.send === 'function') {
+            try {
+                await textChannel.send({ embeds: [endEmbed] });
+            } catch (error) {
+                // Suppress errors when channel is unavailable or permissions are missing
+            }
+        }
 
         // Player'ı temizle
         player.currentTrack = null;
@@ -434,11 +491,20 @@ class MusicEmbedManager {
             .setEmoji(autoplayEmoji)
             .setDisabled(disabled);
 
+        // Lyrics button (only show if lyrics available)
+        const lyricsLabel = await LanguageManager.getTranslation(guildId, 'buttons.lyrics') || 'Lyrics';
+        const lyricsButton = new ButtonBuilder()
+            .setCustomId(`music_lyrics:${requesterId}:${sessionId}`)
+            .setLabel(lyricsLabel)
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🎤')
+            .setDisabled(disabled || !player.hasLyrics());
+
         const row = new ActionRowBuilder()
             .addComponents(pauseButton, skipButton, stopButton, queueButton, shuffleButton);
 
         const row2 = new ActionRowBuilder()
-            .addComponents(volumeButton, loopButton, autoplayButton);
+            .addComponents(volumeButton, loopButton, autoplayButton, lyricsButton);
 
         return [row, row2];
     }

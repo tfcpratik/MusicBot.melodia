@@ -13,7 +13,9 @@
       "error": "❌ Language could not be changed!",
       "error2": "❌ An error occurred while processing the command!",
       "errortitle": "❌ Error",
-      "changed_desc": "Server language has been set to **{language}**!"
+      "changed_desc": "Server language has been set to **{language}**!",
+      "permission_required": "❌ You must have the **Manage Server** permission to use this command!",
+      "permission_required_button": "❌ You must have the **Manage Server** permission to use this button!"
     },
     "help": {
       "title": "🎵 Music Bot Help",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Volume has been set to **{volume}%**!",
     "set_by": "👤 Set by",
     "level": "📊 Level",
-    "volume_error": "❌ Volume could not be set!"
+    "volume_error": "❌ Volume could not be set!",
+    "not_authorized": "❌ You do not have permission to control the music."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ You must be in a voice channel!",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "What genre should play when the queue ends?",
     "autoplay_select_genre": "Select a music genre...",
     "autoplay_enabled": "Autoplay Enabled",
-    "autoplay_enabled_desc": "Autoplay enabled for **{genre}** genre. New songs will be added automatically when the queue ends."
+    "autoplay_enabled_desc": "Autoplay enabled for **{genre}** genre. New songs will be added automatically when the queue ends.",
+    "no_lyrics_found": "No lyrics found for this song.",
+    "lyrics_unavailable": "Lyrics are unavailable for this song.",
+    "lyrics_title": "Song Lyrics",
+    "lyrics_error": "Failed to load lyrics. Please try again later."
   },
   "musicmanager": {
     "playback_ended": "Music Ended",
     "queue_empty": "All songs have been played! Use the `/play` command to add new music.",
     "playlist_added_to_queue": "✅ {count} songs from the playlist added to the queue!",
-    "track_added_to_queue": "✅ **{title}** added to the queue!"
+    "track_added_to_queue": "✅ **{title}** added to the queue!",
+    "control_permission_info": "🔐 Controls: Manage Server permission, DJ role, or music starter only (Queue button is public)"
   },
   "buttons": {
     "pause": "Pause",
@@ -285,7 +293,8 @@
     "loop_track": "Loop: Track",
     "loop_queue": "Loop: Queue",
     "autoplay_off": "Autoplay: Off",
-    "autoplay_on": "Autoplay: On"
+    "autoplay_on": "Autoplay: On",
+    "lyrics": "Lyrics"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Random"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Control Permissions",
+    "music_control_requirement": "To manage music, you must be the person who started it, or have Manage Server permission, or have a role named DJ."
   }
 }

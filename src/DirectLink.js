@@ -50,7 +50,7 @@ class DirectLink {
         }
     }
 
-    static async getStream(url, guildId = null) {
+    static async getStream(url, guildId = null, startSeconds = 0) {
         try {
 
             if (!this.isDirectAudioLink(url)) {
@@ -68,6 +68,8 @@ class DirectLink {
                 }
             });
 
+            // Note: Direct links typically don't support seek via URL
+            // Seeking will be handled by FFmpeg in MusicPlayer
             return response.data;
 
         } catch (error) {

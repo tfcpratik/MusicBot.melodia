@@ -13,7 +13,9 @@
       "error": "❌ ¡No se pudo cambiar el idioma!",
       "error2": "❌ ¡Ocurrió un error al procesar el comando!",
       "errortitle": "❌ Error",
-      "changed_desc": "¡El idioma del servidor se ha establecido en **{language}**!"
+      "changed_desc": "¡El idioma del servidor se ha establecido en **{language}**!",
+      "permission_required": "❌ ¡Necesitas el permiso **Administrar servidor** para usar este comando!",
+      "permission_required_button": "❌ ¡Necesitas el permiso **Administrar servidor** para usar este botón!"
     },
     "help": {
       "title": "🎵 Ayuda del Bot de Música",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "¡El volumen se ha establecido en **{volume}%**!",
     "set_by": "👤 Establecido por",
     "level": "📊 Nivel",
-    "volume_error": "❌ ¡No se pudo establecer el volumen!"
+    "volume_error": "❌ ¡No se pudo establecer el volumen!",
+    "not_authorized": "❌ No tienes permiso para controlar la música."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ ¡Debes estar en un canal de voz!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ ¡Este botón ya no es válido! El sistema de música se ha reiniciado.",
     "unknown_interaction": "❌ ¡Interacción desconocida!",
     "processing_error": "❌ ¡Ocurrió un error durante el procesamiento!",
-    "not_authorized": "❌ ¡Solo los usuarios autorizados y la persona que inició la música pueden usar este botón!",
+    "not_authorized": "❌ No tienes permiso para controlar la música.",
     "no_song_playing": "❌ ¡No se está reproduciendo ninguna canción actualmente!",
     "operation_failed": "❌ ¡La operación falló!",
     "music_paused": "Música Pausada",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "¿Qué género debería reproducirse cuando termine la cola?",
     "autoplay_select_genre": "Selecciona un género musical...",
     "autoplay_enabled": "Reproducción Automática Activada",
-    "autoplay_enabled_desc": "Reproducción automática activada para el género **{genre}**. Se añadirán nuevas canciones automáticamente cuando termine la cola."
+    "autoplay_enabled_desc": "Reproducción automática activada para el género **{genre}**. Se añadirán nuevas canciones automáticamente cuando termine la cola.",
+    "no_lyrics_found": "No se encontró letra para esta canción.",
+    "lyrics_unavailable": "La letra no está disponible.",
+    "lyrics_title": "Letra de la Canción",
+    "lyrics_error": "Error al cargar la letra. Inténtalo de nuevo más tarde."
   },
   "musicmanager": {
     "playback_ended": "Música Terminada",
     "queue_empty": "¡Todas las canciones se han reproducido! Usa el comando `/play` para añadir música nueva.",
     "playlist_added_to_queue": "✅ ¡{count} canciones de la lista añadidas a la cola!",
-    "track_added_to_queue": "✅ ¡**{title}** añadido a la cola!"
+    "track_added_to_queue": "✅ ¡**{title}** añadido a la cola!",
+    "control_permission_info": "🔐 Controles: Solo permiso de Administrar Servidor, rol DJ o quien inició la música (Botón de cola es público)"
   },
   "buttons": {
     "pause": "Pausar",
@@ -285,7 +293,8 @@
     "loop_track": "Repetir: Canción",
     "loop_queue": "Repetir: Cola",
     "autoplay_off": "Reproducción Automática: Desactivada",
-    "autoplay_on": "Reproducción Automática: Activada"
+    "autoplay_on": "Reproducción Automática: Activada",
+    "lyrics": "Letra"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambiental",
     "random": "Aleatorio"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Permisos de control",
+    "music_control_requirement": "Para gestionar la música debes ser quien la inició, tener el permiso Administrar servidor o tener un rol llamado DJ."
   }
 }

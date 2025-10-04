@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const config = require('../config');
 const LanguageManager = require('../src/LanguageManager');
 
@@ -174,36 +174,10 @@ module.exports = {
                 embed.setThumbnail(track.thumbnail);
             }
 
-            // Add control buttons
-            const row = new ActionRowBuilder()
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('music_previous')
-                        .setEmoji('⏮️')
-                        .setStyle(ButtonStyle.Secondary)
-                        .setDisabled(player.previousTracks.length === 0),
-                    new ButtonBuilder()
-                        .setCustomId('music_playpause')
-                        .setEmoji(status.paused ? '▶️' : '⏸️')
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId('music_skip')
-                        .setEmoji('⏭️')
-                        .setStyle(ButtonStyle.Secondary)
-                        .setDisabled(player.queue.length === 0),
-                    new ButtonBuilder()
-                        .setCustomId('music_stop')
-                        .setEmoji('⏹️')
-                        .setStyle(ButtonStyle.Danger),
-                    new ButtonBuilder()
-                        .setCustomId('music_queue')
-                        .setEmoji('📝')
-                        .setStyle(ButtonStyle.Secondary)
-                );
+          
 
             await interaction.reply({
-                embeds: [embed],
-                components: [row]
+                embeds: [embed]
             });
 
         } catch (error) {

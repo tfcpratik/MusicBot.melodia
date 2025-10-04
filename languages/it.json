@@ -13,7 +13,9 @@
       "error": "❌ La lingua non può essere cambiata!",
       "error2": "❌ Si è verificato un errore durante l'elaborazione del comando!",
       "errortitle": "❌ Errore",
-      "changed_desc": "La lingua del server è stata impostata su **{language}**!"
+      "changed_desc": "La lingua del server è stata impostata su **{language}**!",
+      "permission_required": "❌ Devi avere l’autorizzazione **Gestisci server** per usare questo comando!",
+      "permission_required_button": "❌ Devi avere l’autorizzazione **Gestisci server** per usare questo pulsante!"
     },
     "help": {
       "title": "🎵 Aiuto Bot Musicale",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Il volume è stato impostato al **{volume}%**!",
     "set_by": "👤 Impostato da",
     "level": "📊 Livello",
-    "volume_error": "❌ Il volume non può essere impostato!"
+    "volume_error": "❌ Il volume non può essere impostato!",
+    "not_authorized": "❌ Non sei autorizzato a gestire i controlli musicali."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Devi essere in un canale vocale!",
@@ -210,16 +213,16 @@
     "session_invalid": "❌ Questo pulsante non è più valido! Il sistema musicale è stato riavviato.",
     "unknown_interaction": "❌ Interazione sconosciuta!",
     "processing_error": "❌ Si è verificato un errore durante l'elaborazione!",
-    "not_authorized": "❌ Solo utenti autorizzati e la persona che ha iniziato la musica possono usare questo pulsante!",
+    "not_authorized": "❌ Non sei autorizzato a gestire i controlli musicali.",
     "no_song_playing": "❌ Nessuna canzone in riproduzione al momento!",
     "operation_failed": "❌ Operazione fallita!",
-  "autoplay_disabled": "🎲 Riproduzione Automatica Disattivata",
-  "autoplay_disabled_desc": "La funzione di riproduzione automatica è stata disattivata.",
-  "autoplay_select_title": "🎵 Seleziona Genere Musicale",
-  "autoplay_select_desc": "Quale genere dovrebbe essere riprodotto quando la coda termina?",
-  "autoplay_select_genre": "Seleziona un genere musicale...",
-  "autoplay_enabled": "🎲 Riproduzione Automatica Attivata",
-  "autoplay_enabled_desc": "Genere: **{genre}**",
+    "autoplay_disabled": "🎲 Riproduzione Automatica Disattivata",
+    "autoplay_disabled_desc": "La funzione di riproduzione automatica è stata disattivata.",
+    "autoplay_select_title": "🎵 Seleziona Genere Musicale",
+    "autoplay_select_desc": "Quale genere dovrebbe essere riprodotto quando la coda termina?",
+    "autoplay_select_genre": "Seleziona un genere musicale...",
+    "autoplay_enabled": "🎲 Riproduzione Automatica Attivata",
+    "autoplay_enabled_desc": "Genere: **{genre}**",
     "music_paused": "Musica in Pausa",
     "music_resumed": "Musica Ripresa",
     "action_by": "👤 Azione da",
@@ -264,13 +267,18 @@
     "loop_mode_off": "La modalità ripeti è ora **disattivata**",
     "loop_mode_track": "Modalità ripeti impostata su **ripeti brano**. Il brano corrente verrà riprodotto continuamente.",
     "loop_mode_queue": "Modalità ripeti impostata su **ripeti coda**. La coda ripartirà quando finita.",
-    "changed_by": "👤 Modificato da"
+    "changed_by": "👤 Modificato da",
+    "no_lyrics_found": "Nessun testo trovato per questa canzone.",
+    "lyrics_unavailable": "Il testo non è disponibile.",
+    "lyrics_title": "Testo della Canzone",
+    "lyrics_error": "Impossibile caricare il testo. Riprova più tardi."
   },
   "musicmanager": {
     "playback_ended": "Musica Finita",
     "queue_empty": "Tutte le canzoni sono state riprodotte! Usa il comando `/play` per aggiungere nuova musica.",
     "playlist_added_to_queue": "✅ {count} canzoni dalla playlist aggiunte alla coda!",
-    "track_added_to_queue": "✅ **{title}** aggiunto alla coda!"
+    "track_added_to_queue": "✅ **{title}** aggiunto alla coda!",
+    "control_permission_info": "🔐 Controlli: Solo permesso Gestisci Server, ruolo DJ o avviatore musicale (Pulsante coda pubblico)"
   },
   "buttons": {
     "pause": "Pausa",
@@ -285,7 +293,8 @@
     "loop_track": "Ripeti: Brano",
     "loop_queue": "Ripeti: Coda",
     "autoplay_off": "Riproduzione Auto: Disattivata",
-    "autoplay_on": "Riproduzione Auto: Attivata"
+    "autoplay_on": "Riproduzione Auto: Attivata",
+    "lyrics": "Testo"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Casuale"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Permessi di controllo",
+    "music_control_requirement": "Per gestire la musica devi essere la persona che l’ha avviata, avere l’autorizzazione Gestisci server o avere un ruolo chiamato DJ."
   }
 }

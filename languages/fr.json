@@ -13,7 +13,9 @@
       "error": "❌ La langue n'a pas pu être modifiée!",
       "error2": "❌ Une erreur s'est produite lors du traitement de la commande!",
       "errortitle": "❌ Erreur",
-      "changed_desc": "La langue du serveur a été définie sur **{language}**!"
+      "changed_desc": "La langue du serveur a été définie sur **{language}**!",
+      "permission_required": "❌ Vous devez disposer de l’autorisation **Gérer le serveur** pour utiliser cette commande !",
+      "permission_required_button": "❌ Vous devez disposer de l’autorisation **Gérer le serveur** pour utiliser ce bouton !"
     },
     "help": {
       "title": "🎵 Aide du Bot Musical",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Le volume a été réglé sur **{volume}%**!",
     "set_by": "👤 Défini par",
     "level": "📊 Niveau",
-    "volume_error": "❌ Le volume n'a pas pu être réglé!"
+    "volume_error": "❌ Le volume n'a pas pu être réglé!",
+    "not_authorized": "❌ Vous n’êtes pas autorisé à gérer les contrôles de musique."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Vous devez être dans un canal vocal!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Ce bouton n'est plus valide! Le système musical a été redémarré.",
     "unknown_interaction": "❌ Interaction inconnue!",
     "processing_error": "❌ Une erreur s'est produite pendant le traitement!",
-    "not_authorized": "❌ Seuls les utilisateurs autorisés et la personne qui a lancé la musique peuvent utiliser ce bouton!",
+    "not_authorized": "❌ Vous n’êtes pas autorisé à gérer les contrôles de musique.",
     "no_song_playing": "❌ Aucune chanson n'est actuellement en cours de lecture!",
     "operation_failed": "❌ L'opération a échoué!",
     "music_paused": "Musique en pause",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Quel genre doit être lu lorsque la file se termine ?",
     "autoplay_select_genre": "Sélectionnez un genre musical...",
     "autoplay_enabled": "Lecture Automatique Activée",
-    "autoplay_enabled_desc": "Lecture automatique activée pour le genre **{genre}**. De nouvelles chansons seront ajoutées automatiquement lorsque la file se termine."
+    "autoplay_enabled_desc": "Lecture automatique activée pour le genre **{genre}**. De nouvelles chansons seront ajoutées automatiquement lorsque la file se termine.",
+    "no_lyrics_found": "Aucune parole trouvée pour cette chanson.",
+    "lyrics_unavailable": "Les paroles ne sont pas disponibles.",
+    "lyrics_title": "Paroles de la Chanson",
+    "lyrics_error": "Échec du chargement des paroles. Veuillez réessayer plus tard."
   },
   "musicmanager": {
     "playback_ended": "Musique terminée",
     "queue_empty": "Toutes les chansons ont été lues! Utilisez la commande `/play` pour ajouter de la nouvelle musique.",
     "playlist_added_to_queue": "✅ {count} chansons de la playlist ajoutées à la file!",
-    "track_added_to_queue": "✅ **{title}** ajouté à la file!"
+    "track_added_to_queue": "✅ **{title}** ajouté à la file!",
+    "control_permission_info": "🔐 Contrôles: Permission Gérer le serveur, rôle DJ ou démarreur de musique uniquement (Bouton file publique)"
   },
   "buttons": {
     "pause": "Pause",
@@ -285,7 +293,8 @@
     "loop_track": "Boucle: Piste",
     "loop_queue": "Boucle: File",
     "autoplay_off": "Lecture Auto: Désactivée",
-    "autoplay_on": "Lecture Auto: Activée"
+    "autoplay_on": "Lecture Auto: Activée",
+    "lyrics": "Paroles"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Aléatoire"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Permissions de contrôle",
+    "music_control_requirement": "Pour gérer la musique, vous devez être la personne qui l’a lancée, avoir l’autorisation Gérer le serveur ou posséder un rôle nommé DJ."
   }
 }

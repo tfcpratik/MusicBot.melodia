@@ -14,9 +14,12 @@ const Spotify = require('./Spotify');
 const SoundCloud = require('./SoundCloud');
 const DirectLink = require('./DirectLink');
 const LanguageManager = require('./LanguageManager');
+const PlayerStateManager = require('./PlayerStateManager');
+const LyricsManager = require('./LyricsManager');
 const prism = require('prism-media');
 const ffmpegPath = require('ffmpeg-static');
 const { promisify } = require('util');
+const chalk = require('chalk');
 const { pipeline, Readable } = require('stream');
 const pipelineAsync = promisify(pipeline);
 const fs = require('fs').promises;
@@ -105,6 +108,21 @@ class MusicPlayer {
         this.lastPlaybackPosition = 0;
         this.currentTrackStartOffsetMs = 0;
 
+        // Lyrics system (button-only, no sync)
+        this.currentLyrics = null; // Lyrics data for current track
+
+        // Persistence management
+        this.stateSyncInterval = null;
+        this.stateSyncIntervalMs = 5000;
+        this.stateSaveTimeout = null;
+
+        // Pause management
+        this.pauseReasons = new Set();
+
+        // Inactivity timeout
+        this.inactivityTimer = null;
+        this.inactivityTimeoutMs = 2 * 60 * 1000;
+
         // Local file caching
         this.currentDownloadedFile = null; // Path to currently playing downloaded file
         this.downloadedFiles = new Set(); // Track all downloaded files for cleanup
@@ -112,21 +130,26 @@ class MusicPlayer {
 
         // Events setup
         this.setupEvents();
-
-
     }
 
     setupEvents() {
         // Audio player events
         this.audioPlayer.on(AudioPlayerStatus.Playing, () => {
-
-            this.startTime = Date.now();
+            // When resuming, adjust startTime to account for elapsed offset
+            if (this.paused && this.pausedTime > 0) {
+                // Resuming from pause - keep the accumulated pausedTime
+                this.startTime = Date.now();
+            } else if (!this.startTime) {
+                // First time playing - set start time accounting for any offset
+                this.startTime = Date.now();
+            }
             this.paused = false;
         });
 
         this.audioPlayer.on(AudioPlayerStatus.Paused, () => {
-
-            this.pausedTime += Date.now() - this.startTime;
+            if (this.startTime) {
+                this.pausedTime += Date.now() - this.startTime;
+            }
             this.paused = true;
         });
 
@@ -349,6 +372,35 @@ class MusicPlayer {
         }
     }
 
+    async moveToChannel(newChannel) {
+        if (!newChannel) return false;
+
+        this.voiceChannel = newChannel;
+
+        if (this.connection) {
+            try {
+                this.connection.rejoin({
+                    channelId: newChannel.id,
+                    selfDeaf: false,
+                    selfMute: false
+                });
+
+                await entersState(this.connection, VoiceConnectionStatus.Ready, 15000);
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to rejoin new voice channel:', error);
+                try {
+                    this.connection.destroy();
+                } catch (destroyError) {
+                    console.error('❌ Error destroying old connection:', destroyError);
+                }
+                this.connection = null;
+            }
+        }
+
+        return await this.connect();
+    }
+
     disconnect() {
         if (this.connection && this.connection.state.status !== 'destroyed') {
             try {
@@ -427,22 +479,25 @@ class MusicPlayer {
 
             // Auto-play if not currently playing
             if (wasIdle) {
-                // Player was idle, start playing the first added track
+                // Player was idle, start playing the first added track from beginning
                 if (addedTracks.length > 0) {
                     this.currentTrack = addedTracks[0];
-                    await this.play();
+                    await this.play(null, 0);
                 }
             } else if (this.audioPlayer.state && this.audioPlayer.state.status === AudioPlayerStatus.Idle) {
                 // Player exists but is idle (finished playing) - start next from queue
-                await this.play();
+                await this.play(null, 0);
             }
 
-            return {
+            const result = {
                 success: true,
                 tracks: addedTracks,
                 isPlaylist: tracks.length > 1,
                 position: this.queue.length
             };
+
+            await this.persistState('queue-update');
+            return result;
 
         } catch (error) {
             const errorMsg = await LanguageManager.getTranslation(this.guild.id, 'musicplayer.error_adding_track');
@@ -469,6 +524,7 @@ class MusicPlayer {
                 const stats = await fs.stat(filepath);
                 if (stats.size > 0) {
                     this.downloadedFiles.add(filepath);
+                    this.scheduleStatePersist('download-cache-hit', 500);
                     return filepath;
                 }
             }
@@ -483,6 +539,7 @@ class MusicPlayer {
                         const stats = await fs.stat(filepath);
                         if (stats.size > 0) {
                             this.downloadedFiles.add(filepath);
+                            this.scheduleStatePersist('download-wait-complete', 500);
                             return filepath;
                         }
                     }
@@ -597,6 +654,7 @@ class MusicPlayer {
 
             this.downloadedFiles.add(filepath);
             this.downloadingFiles.delete(filepath); // Remove from downloading set
+            this.scheduleStatePersist('download-complete', 500);
             return filepath;
 
         } catch (error) {
@@ -615,6 +673,7 @@ class MusicPlayer {
         try {
             await fs.unlink(filepath);
             this.downloadedFiles.delete(filepath);
+            this.scheduleStatePersist('download-removed', 500);
         } catch (error) {
             if (error.code !== 'ENOENT') {
                 console.error(`❌ Failed to delete file ${filepath}:`, error.message);
@@ -656,6 +715,7 @@ class MusicPlayer {
             this.currentTrackStartOffsetMs = resumeFromMs;
             this.lastPlaybackPosition = resumeFromMs;
             this.pausedTime = 0;
+            this.startTime = null; // Will be set when Playing event fires
 
             // Get audio stream - check preloaded first!
             let streamUrl = this.currentTrack.url;
@@ -850,9 +910,14 @@ class MusicPlayer {
                     shouldDownload = false; // Fall through to file playback
                 } else if (audioStream) {
                     // Create FFmpeg process for streaming
+                    const seekArgs = resumeFromMs > 0 
+                        ? ['-ss', (resumeFromMs / 1000).toFixed(3)] 
+                        : [];
+                    
                     const ffmpegProcess = new prism.FFmpeg({
                         command: ffmpegPath,
                         args: [
+                            ...seekArgs,  // Add seek if resuming
                             '-analyzeduration', '0',
                             '-loglevel', '0',
                             '-i', 'pipe:0',
@@ -884,9 +949,14 @@ class MusicPlayer {
             
             // File playback mode (either pre-downloaded or fallback from streaming)
             if (!shouldDownload && downloadedFile) {
+                const seekArgs = resumeFromMs > 0 
+                    ? ['-ss', (resumeFromMs / 1000).toFixed(3)] 
+                    : [];
+                
                 const ffmpegProcess = new prism.FFmpeg({
                     command: ffmpegPath,
                     args: [
+                        ...seekArgs,  // Add seek BEFORE input for faster seeking
                         '-i', downloadedFile,
                         '-analyzeduration', '0',
                         '-loglevel', '0',
@@ -926,6 +996,10 @@ class MusicPlayer {
             // Play the resource
             this.audioPlayer.play(this.resource);
 
+            if (this.pauseReasons.size > 0) {
+                this.audioPlayer.pause();
+            }
+
             // Store active stream info for quick resume
             const baseSourceUrl = typeof streamInfo === 'object'
                 ? (streamInfo.rawUrl || streamInfo.url || (typeof streamUrl_final === 'string' ? streamUrl_final : null))
@@ -945,6 +1019,12 @@ class MusicPlayer {
 
             // Schedule watchdog to ensure proper completion and prevent premature transitions
             this.scheduleTrackWatchdog(streamInfo);
+
+            this.startStateSync();
+            await this.persistState(resumeFromMs > 0 ? 'resume-playback' : 'play');
+
+            // Fetch and start lyrics system
+            this.fetchAndStartLyrics();
 
             return { success: true, track: this.currentTrack };
 
@@ -1073,25 +1153,141 @@ class MusicPlayer {
         return reason;
     }
 
-    pause() {
-        if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) {
-            this.audioPlayer.pause();
+    pause(reason = 'manual') {
+        return this.pauseFor(reason);
+    }
+
+    resume(reason = 'manual') {
+        return this.resumeFor(reason);
+    }
+
+    pauseFor(reason = null) {
+        if (reason) {
+            this.pauseReasons.add(reason);
+            this.scheduleStatePersist('pause-update', 200);
+        }
+
+        const status = this.audioPlayer.state.status;
+        if (status === AudioPlayerStatus.Paused) {
             this.paused = true;
+            this.scheduleStatePersist('pause', 0);
             return true;
         }
+
+        if (status === AudioPlayerStatus.Playing) {
+            const paused = this.audioPlayer.pause();
+            if (paused) {
+                this.paused = true;
+                this.scheduleStatePersist('pause', 0);
+                return true;
+            }
+        }
+
         return false;
     }
 
-    resume() {
-        if (this.audioPlayer.state.status === AudioPlayerStatus.Paused) {
-            this.audioPlayer.unpause();
+    resumeFor(reason = null) {
+        if (reason) {
+            this.pauseReasons.delete(reason);
+            this.scheduleStatePersist('resume-update', 200);
+        }
+
+        if (this.pauseReasons.size > 0) {
+            return false;
+        }
+
+        const status = this.audioPlayer.state.status;
+        if (status === AudioPlayerStatus.Paused) {
+            const resumed = this.audioPlayer.unpause();
+            if (resumed) {
+                this.paused = false;
+                this.scheduleStatePersist('resume', 0);
+                return true;
+            }
+            return false;
+        }
+
+        if (status === AudioPlayerStatus.Playing) {
             this.paused = false;
+            this.scheduleStatePersist('resume', 0);
             return true;
         }
+
         return false;
+    }
+
+    startInactivityTimer() {
+        if (this.inactivityTimer) return;
+
+        this.pauseFor('alone');
+
+        this.inactivityTimer = setTimeout(async () => {
+            this.inactivityTimer = null;
+
+            const channelId = this.voiceChannel?.id;
+            const channel = channelId ? this.guild.channels.cache.get(channelId) : null;
+            const hasListeners = channel ? channel.members.filter(member => !member.user.bot).size > 0 : false;
+
+            if (hasListeners) {
+                this.resumeFor('alone');
+                if (global.clients?.musicEmbedManager) {
+                    await global.clients.musicEmbedManager.updateNowPlayingEmbed(this);
+                }
+                return;
+            }
+
+            this.pauseReasons.clear();
+            this.pendingEndReason = 'inactivity-timeout';
+            this.queue = [];
+            this.currentTrack = null;
+
+            try {
+                const embedManager = global.clients?.musicEmbedManager;
+                if (embedManager) {
+                    await embedManager.handlePlaybackEnd(this);
+                } else if (typeof this.showQueueCompleted === 'function') {
+                    await this.showQueueCompleted();
+                }
+
+                await this.persistState('inactivity-timeout');
+            } catch (error) {
+                console.error('❌ Failed to update playback UI after inactivity timeout:', error);
+            } finally {
+                try {
+                    this.cleanup();
+                } finally {
+                    const client = this.guild?.client;
+                    if (client?.players) {
+                        client.players.delete(this.guild.id);
+                    }
+                }
+            }
+        }, this.inactivityTimeoutMs);
+    }
+
+    clearInactivityTimer(shouldResume = true) {
+        if (this.inactivityTimer) {
+            clearTimeout(this.inactivityTimer);
+            this.inactivityTimer = null;
+        }
+
+        if (shouldResume) {
+            this.resumeFor('alone');
+        } else {
+            this.pauseReasons.delete('alone');
+        }
     }
 
     stop() {
+        this.clearInactivityTimer(false);
+        this.pauseReasons.clear();
+        this.paused = false;
+
+        this.stopStateSync();
+        if (this.guild?.id) {
+            PlayerStateManager.removeState(this.guild.id).catch(() => {});
+        }
+
         // Clear track timer
         if (this.trackTimer) {
             clearTimeout(this.trackTimer);
@@ -1131,6 +1327,7 @@ class MusicPlayer {
             this.pendingEndReason = 'skip';
             this.skipRequested = true;
             this.audioPlayer.stop(true);
+            this.scheduleStatePersist('skip', 0);
             return true;
         }
         return false;
@@ -1143,6 +1340,7 @@ class MusicPlayer {
             }
             this.currentTrack = this.previousTracks.pop();
             this.audioPlayer.stop(); // This will trigger play
+            this.scheduleStatePersist('previous', 0);
             return true;
         }
         return false;
@@ -1153,6 +1351,7 @@ class MusicPlayer {
         if (this.resource && this.resource.volume) {
             this.resource.volume.setVolume(this.volume / 100);
         }
+        this.scheduleStatePersist('volume', 200);
         return this.volume;
     }
 
@@ -1162,6 +1361,7 @@ class MusicPlayer {
                 const j = Math.floor(Math.random() * (i + 1));
                 [this.queue[i], this.queue[j]] = [this.queue[j], this.queue[i]];
             }
+            this.scheduleStatePersist('shuffle-queue', 200);
             return true;
         }
         return false;
@@ -1170,23 +1370,28 @@ class MusicPlayer {
     setLoop(mode) {
         // mode: false, 'track', 'queue'
         this.loop = mode;
+        this.scheduleStatePersist('loop', 200);
         return this.loop;
     }
 
     setShuffle(enabled) {
         this.shuffle = enabled;
+        this.scheduleStatePersist('shuffle-toggle', 200);
         return this.shuffle;
     }
 
     clearQueue() {
         const cleared = this.queue.length;
         this.queue = [];
+        this.scheduleStatePersist('clear-queue', 0);
         return cleared;
     }
 
     removeFromQueue(index) {
         if (index >= 0 && index < this.queue.length) {
-            return this.queue.splice(index, 1)[0];
+            const removed = this.queue.splice(index, 1)[0];
+            this.scheduleStatePersist('queue-remove', 200);
+            return removed;
         }
         return null;
     }
@@ -1195,6 +1400,7 @@ class MusicPlayer {
         if (from >= 0 && from < this.queue.length && to >= 0 && to < this.queue.length) {
             const track = this.queue.splice(from, 1)[0];
             this.queue.splice(to, 0, track);
+            this.scheduleStatePersist('queue-move', 200);
             return true;
         }
         return false;
@@ -1222,6 +1428,11 @@ class MusicPlayer {
     }
 
     getCurrentTime() {
+        const playbackDuration = this.audioPlayer?.state?.resource?.playbackDuration;
+        if (typeof playbackDuration === 'number' && Number.isFinite(playbackDuration)) {
+            return this.currentTrackStartOffsetMs + playbackDuration;
+        }
+
         if (!this.startTime) return this.currentTrackStartOffsetMs;
         if (this.paused) {
             return this.currentTrackStartOffsetMs + this.pausedTime;
@@ -1278,7 +1489,8 @@ class MusicPlayer {
             }
 
             if (this.loop === 'track') {
-                await this.play();
+                // Loop track from beginning
+                await this.play(null, 0);
                 return;
             }
 
@@ -1302,7 +1514,8 @@ class MusicPlayer {
                     this.currentTrack = this.queue.shift();
                 }
 
-                await this.play();
+                // Play next track from beginning
+                await this.play(null, 0);
 
                 const MusicEmbedManager = require('./MusicEmbedManager');
                 if (global.clients && global.clients.musicEmbedManager) {
@@ -1329,11 +1542,20 @@ class MusicPlayer {
                 await this.showQueueCompleted();
             }
 
+            this.clearInactivityTimer(false);
+            if (this.guild?.id) {
+                await PlayerStateManager.removeState(this.guild.id);
+            }
+
             setTimeout(() => {
                 if (this.queue.length === 0 && !this.currentTrack) {
                     this.cleanup();
+                    const clientInstance = this.guild?.client;
+                    if (clientInstance?.players) {
+                        clientInstance.players.delete(this.guild.id);
+                    }
                 }
-            }, 5 * 60 * 1000);
+            }, 10000);
         } finally {
             this.isTransitioning = false;
             this.skipRequested = false;
@@ -1444,9 +1666,9 @@ class MusicPlayer {
                 }
             });
 
-            // Start playing
+            // Start playing from beginning
             this.currentTrack = this.queue.shift();
-            await this.play();
+            await this.play(null, 0);
 
             // Update now playing embed for autoplay track
             const MusicEmbedManager = require('./MusicEmbedManager');
@@ -1464,7 +1686,7 @@ class MusicPlayer {
         // Try to skip to next track on error
         if (this.queue.length > 0) {
             this.currentTrack = this.queue.shift();
-            await this.play();
+            await this.play(null, 0);
         } else {
             this.currentTrack = null;
             const errorMsg = await LanguageManager.getTranslation(this.guild.id, 'musicplayer.error_playlist_stopped');
@@ -1611,6 +1833,310 @@ class MusicPlayer {
         }
     }
 
+    serializeTrack(track) {
+        if (!track) return null;
+
+        const requester = track.requestedBy || null;
+        const requesterId = requester?.id || track.requesterId || null;
+        const requesterTag = requester?.tag || requester?.user?.tag || track.requesterTag || null;
+
+        return {
+            id: track.id || null,
+            title: track.title || null,
+            url: track.url || null,
+            duration: typeof track.duration === 'number' ? track.duration : Number(track.duration) || null,
+            thumbnail: track.thumbnail || null,
+            artist: track.artist || null,
+            album: track.album || null,
+            platform: track.platform || null,
+            uploader: track.uploader || null,
+            youtubeUrl: track.youtubeUrl || null,
+            soundcloudUrl: track.soundcloudUrl || null,
+            spotifyUrl: track.spotifyUrl || null,
+            isLive: track.isLive || track.live || false,
+            addedAt: track.addedAt || Date.now(),
+            requesterId,
+            requesterTag,
+            extra: track.extra || null
+        };
+    }
+
+    deserializeTrack(data) {
+        if (!data) return null;
+
+        const track = {
+            id: data.id || null,
+            title: data.title || null,
+            url: data.url || null,
+            duration: typeof data.duration === 'number' ? data.duration : Number(data.duration) || null,
+            thumbnail: data.thumbnail || null,
+            artist: data.artist || null,
+            album: data.album || null,
+            platform: data.platform || null,
+            uploader: data.uploader || null,
+            youtubeUrl: data.youtubeUrl || null,
+            soundcloudUrl: data.soundcloudUrl || null,
+            spotifyUrl: data.spotifyUrl || null,
+            isLive: Boolean(data.isLive),
+            addedAt: data.addedAt || Date.now(),
+            extra: data.extra || null
+        };
+
+        if (data.requesterId) {
+            const cachedMember = this.guild?.members?.cache?.get?.(data.requesterId) || null;
+            track.requestedBy = cachedMember || { id: data.requesterId, tag: data.requesterTag || data.requesterId };
+            track.requesterId = data.requesterId;
+            track.requesterTag = data.requesterTag || null;
+        }
+
+        return track;
+    }
+
+    serializeState() {
+        const guildId = this.guild?.id;
+        if (!guildId) return null;
+
+        return {
+            guildId,
+            voiceChannelId: this.voiceChannel?.id || null,
+            textChannelId: this.textChannel?.id || null,
+            currentTrack: this.serializeTrack(this.currentTrack),
+            queue: this.queue.map(track => this.serializeTrack(track)).filter(Boolean),
+            previousTracks: this.previousTracks.slice(-10).map(track => this.serializeTrack(track)).filter(Boolean),
+            volume: this.volume,
+            loop: this.loop,
+            shuffle: this.shuffle,
+            autoplay: this.autoplay,
+            paused: this.paused,
+            pauseReasons: Array.from(this.pauseReasons || []),
+            playbackPositionMs: this.getCurrentTime() || 0,
+            currentTrackStartOffsetMs: this.currentTrackStartOffsetMs || 0,
+            lastPlaybackPosition: this.lastPlaybackPosition || 0,
+            requesterId: this.requesterId || null,
+            nowPlayingMessageId: this.nowPlayingMessage?.id || null,
+            nowPlayingChannelId: this.nowPlayingMessage?.channelId || this.textChannel?.id || null,
+            sessionId: this.sessionId,
+            downloadedFiles: Array.from(this.downloadedFiles || [])
+                .filter(Boolean)
+                .map(filepath => path.resolve(filepath)),
+            currentDownloadedFile: this.currentDownloadedFile ? path.resolve(this.currentDownloadedFile) : null,
+            updatedAt: Date.now()
+        };
+    }
+
+    async restoreFromState(state) {
+        if (!state || !this.guild?.id) return;
+        this.stopStateSync();
+        this.pauseReasons = new Set();
+        this.preloadedStreams.clear();
+        this.preloadingQueue = [];
+
+        this.volume = typeof state.volume === 'number' ? state.volume : this.volume;
+        this.loop = state.loop ?? false;
+        this.shuffle = state.shuffle ?? false;
+        this.autoplay = state.autoplay ?? false;
+        this.requesterId = state.requesterId || this.requesterId;
+
+        this.previousTracks = (state.previousTracks || [])
+            .map(serialized => this.deserializeTrack(serialized))
+            .filter(Boolean);
+
+        const restoredQueue = (state.queue || [])
+            .map(serialized => this.deserializeTrack(serialized))
+            .filter(Boolean);
+
+        this.queue = restoredQueue;
+        this.currentTrack = this.deserializeTrack(state.currentTrack) || null;
+
+        if (!this.currentTrack && this.queue.length > 0) {
+            this.currentTrack = this.queue.shift();
+        }
+
+        const validDownloads = new Set();
+        for (const file of state.downloadedFiles || []) {
+            if (!file) continue;
+            try {
+                if (fsSync.existsSync(file)) {
+                    validDownloads.add(path.resolve(file));
+                } else {
+                    console.log(`❌ Missing cached file: ${path.basename(file)}`);
+                }
+            } catch (error) {
+                console.log(`⚠️ Error checking file ${path.basename(file)}: ${error.message}`);
+            }
+        }
+        this.downloadedFiles = validDownloads;
+
+        if (state.currentDownloadedFile && fsSync.existsSync(state.currentDownloadedFile)) {
+            this.currentDownloadedFile = path.resolve(state.currentDownloadedFile);
+         } else {
+            this.currentDownloadedFile = null;
+         }
+
+        const resumeMsRaw = Number(state.playbackPositionMs) || 0;
+        const trackDurationMs = this.currentTrack?.duration ? Number(this.currentTrack.duration) * 1000 : null;
+        let resumeMs = Math.max(0, resumeMsRaw);
+        if (trackDurationMs && resumeMs > Math.max(trackDurationMs - 2000, 0)) {
+            resumeMs = 0;
+        }
+
+        this.currentTrackStartOffsetMs = Math.max(Number(state.currentTrackStartOffsetMs) || 0, 0);
+        this.lastPlaybackPosition = resumeMs;
+        this.paused = false;
+
+        if (!this.connection) {
+            const connected = await this.connect();
+            if (!connected) {
+                throw new Error('Failed to reconnect to voice channel');
+            }
+        }
+
+        if (!this.currentTrack) {
+            await PlayerStateManager.removeState(this.guild.id);
+            return;
+        }
+
+        await this.play(null, resumeMs);
+
+        if (this.resource?.volume) {
+            this.resource.volume.setVolume(this.volume / 100);
+        }
+
+        const embedManager = global.clients?.musicEmbedManager;
+        if (embedManager && this.textChannel) {
+            try {
+                const embed = await embedManager.createNowPlayingEmbed(this, this.currentTrack, this.guild.id);
+                const buttons = await embedManager.createControlButtons(this);
+
+                let nowPlayingMessage = null;
+                if (state.nowPlayingMessageId) {
+                    nowPlayingMessage = await this.textChannel.messages.fetch(state.nowPlayingMessageId).catch(() => null);
+                }
+
+                if (nowPlayingMessage) {
+                    await nowPlayingMessage.edit({ embeds: [embed], components: buttons });
+                    this.nowPlayingMessage = nowPlayingMessage;
+                } else {
+                    this.nowPlayingMessage = await this.textChannel.send({ embeds: [embed], components: buttons });
+                }
+            } catch (error) {
+                console.error('❌ Failed to rebuild now playing embed during restore:', error?.message || error);
+            }
+        }
+
+        if (this.textChannel && this.currentTrack) {
+            try {
+                const resumeMessage = await LanguageManager.getTranslation(this.guild.id, 'buttonhandler.music_resumed');
+                const positionSeconds = Math.floor(resumeMs / 1000);
+                const positionFormatted = this.formatDuration(positionSeconds);
+
+                await this.textChannel.send({
+                    content: `▶️ ${resumeMessage} • **${this.currentTrack.title || 'Unknown'}** (${positionFormatted})`
+                });
+            } catch (error) {
+                // Ignore if message cannot be sent
+            }
+        }
+
+        this.scheduleStatePersist('restored', 1000);
+    }
+
+    async persistState(reason = 'manual', immediate = false) {
+        try {
+            if (!this.guild?.id) return;
+
+            // Cancel pending save if this is immediate
+            if (immediate && this.pendingStateSave) {
+                clearTimeout(this.pendingStateSave);
+                this.pendingStateSave = null;
+            }
+
+            if (!this.currentTrack && this.queue.length === 0) {
+                await PlayerStateManager.removeState(this.guild.id);
+                return;
+            }
+
+            const state = this.serializeState();
+            if (!state) {
+                await PlayerStateManager.removeState(this.guild.id);
+                return;
+            }
+
+            state.reason = reason;
+            await PlayerStateManager.saveState(this.guild.id, state);
+        } catch (error) {
+            console.error(`❌ Failed to persist player state for guild ${this.guild?.id}:`, error.message || error);
+        }
+    }
+
+    startStateSync() {
+        if (this.stateSyncInterval) return;
+
+        this.stateSyncInterval = setInterval(() => {
+            if (!this.guild?.id) return;
+            if (!this.currentTrack && this.queue.length === 0) return;
+
+            this.persistState('interval').catch(() => {});
+        }, this.stateSyncIntervalMs);
+    }
+
+    stopStateSync() {
+        if (this.stateSyncInterval) {
+            clearInterval(this.stateSyncInterval);
+            this.stateSyncInterval = null;
+        }
+
+        this.cancelStateSave();
+    }
+
+    cancelStateSave() {
+        if (this.stateSaveTimeout) {
+            clearTimeout(this.stateSaveTimeout);
+            this.stateSaveTimeout = null;
+        }
+    }
+
+    // ==================== LYRICS SYSTEM ====================
+
+    async fetchAndStartLyrics() {
+        try {
+            if (!this.currentTrack) return;
+
+            // Fetch lyrics in background (no sync, button-only display)
+            this.currentLyrics = await LyricsManager.fetchLyrics(this.currentTrack);
+
+            if (this.currentLyrics && this.currentLyrics.plain) {
+                const sourceLabel = this.currentLyrics.source ? ` via ${this.currentLyrics.source}` : '';
+                // Update now playing embed to enable lyrics button
+                const embedManager = global.clients?.musicEmbedManager;
+                if (embedManager && this.nowPlayingMessage) {
+                    try {
+                        await embedManager.updateNowPlayingEmbed(this);
+                    } catch (error) {
+                        // Ignore update errors
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Failed to fetch lyrics:', error.message);
+            this.currentLyrics = null;
+        }
+    }
+
+    hasLyrics() {
+        return Boolean(this.currentLyrics && this.currentLyrics.plain);
+    }
+
+    // ==================== END LYRICS SYSTEM ====================
+
+    scheduleStatePersist(reason = 'update', delay = 200) {
+        this.cancelStateSave();
+        this.stateSaveTimeout = setTimeout(() => {
+            this.stateSaveTimeout = null;
+            this.persistState(reason).catch(() => {});
+        }, Math.max(delay, 0));
+    }
+
     formatDuration(seconds) {
         // Ensure seconds is integer and handle floating point errors
         const totalSeconds = Math.floor(Number(seconds) || 0);
@@ -1619,18 +2145,30 @@ class MusicPlayer {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    cleanup() {
+    cleanup(isShutdown = false) {
         try {
-            // Clean up all downloaded files
-            if (this.currentDownloadedFile) {
-                this.deleteDownloadedFile(this.currentDownloadedFile);
-                this.currentDownloadedFile = null;
+            this.clearInactivityTimer(false);
+            this.stopStateSync();
+
+            // During shutdown, save state before cleanup
+            if (isShutdown && this.guild?.id) {
+                this.persistState('shutdown').catch(() => {});
+            } else if (this.guild?.id) {
+                PlayerStateManager.removeState(this.guild.id).catch(() => {});
             }
 
-            for (const filepath of this.downloadedFiles) {
-                this.deleteDownloadedFile(filepath);
+            // Clean up all downloaded files (unless shutdown)
+            if (!isShutdown) {
+                if (this.currentDownloadedFile) {
+                    this.deleteDownloadedFile(this.currentDownloadedFile);
+                    this.currentDownloadedFile = null;
+                }
+
+                for (const filepath of this.downloadedFiles) {
+                    this.deleteDownloadedFile(filepath);
+                }
+                this.downloadedFiles.clear();
             }
-            this.downloadedFiles.clear();
 
             // Stop recovery system
             this.stopConnectionRecovery();
@@ -1698,6 +2236,12 @@ class MusicPlayer {
             // Clear UI references
             this.nowPlayingMessage = null;
             this.requesterId = null;
+            this.voiceChannel = null;
+            this.textChannel = null;
+
+            // Reset pause state
+            this.pauseReasons.clear();
+            this.paused = false;
         } catch (error) {
             console.error('❌ Error during cleanup:', error);
         }

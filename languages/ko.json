@@ -13,7 +13,9 @@
       "error": "❌ 언어를 변경할 수 없습니다!",
       "error2": "❌ 명령을 처리하는 중 오류가 발생했습니다!",
       "errortitle": "❌ 오류",
-      "changed_desc": "서버 언어가 **{language}**로 설정되었습니다!"
+      "changed_desc": "서버 언어가 **{language}**로 설정되었습니다!",
+      "permission_required": "❌ 이 명령어를 사용하려면 **서버 관리** 권한이 필요합니다!",
+      "permission_required_button": "❌ 이 버튼을 사용하려면 **서버 관리** 권한이 필요합니다!"
     },
     "help": {
       "title": "🎵 음악 봇 도움말",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "볼륨이 **{volume}%**로 설정되었습니다!",
     "set_by": "👤 설정자",
     "level": "📊 레벨",
-    "volume_error": "❌ 볼륨을 설정할 수 없습니다!"
+    "volume_error": "❌ 볼륨을 설정할 수 없습니다!",
+    "not_authorized": "❌ 음악 컨트롤을 관리할 권한이 없습니다."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ 음성 채널에 있어야 합니다!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ 이 버튼은 더 이상 유효하지 않습니다! 음악 시스템이 재시작되었습니다.",
     "unknown_interaction": "❌ 알 수 없는 상호작용!",
     "processing_error": "❌ 처리 중 오류가 발생했습니다!",
-    "not_authorized": "❌ 권한이 있는 사용자와 음악을 시작한 사람만 이 버튼을 사용할 수 있습니다!",
+    "not_authorized": "❌ 음악 컨트롤을 관리할 권한이 없습니다.",
     "no_song_playing": "❌ 현재 재생 중인 노래가 없습니다!",
     "operation_failed": "❌ 작업이 실패했습니다!",
     "music_paused": "음악 일시정지됨",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "대기열이 끝나면 어떤 장르를 재생할까요?",
     "autoplay_select_genre": "음악 장르를 선택하세요...",
     "autoplay_enabled": "🎲 자동 재생이 활성화되었습니다",
-    "autoplay_enabled_desc": "장르: **{genre}**"
+    "autoplay_enabled_desc": "장르: **{genre}**",
+    "no_lyrics_found": "이 곡의 가사를 찾을 수 없습니다.",
+    "lyrics_unavailable": "가사를 사용할 수 없습니다.",
+    "lyrics_title": "노래 가사",
+    "lyrics_error": "가사 로드에 실패했습니다. 나중에 다시 시도하세요."
   },
   "musicmanager": {
     "playback_ended": "음악 종료됨",
     "queue_empty": "모든 노래가 재생되었습니다! `/play` 명령을 사용하여 새 음악을 추가하세요.",
     "playlist_added_to_queue": "✅ 재생목록의 {count}개 노래가 대기열에 추가되었습니다!",
-    "track_added_to_queue": "✅ **{title}**가 대기열에 추가되었습니다!"
+    "track_added_to_queue": "✅ **{title}**가 대기열에 추가되었습니다!",
+    "control_permission_info": "🔐 컨트롤: 서버 관리 권한, DJ 역할 또는 음악 시작자만 사용 가능 (대기열 버튼은 공개)"
   },
   "buttons": {
     "pause": "일시정지",
@@ -285,7 +293,8 @@
     "loop_track": "반복: 트랙",
     "loop_queue": "반복: 대기열",
     "autoplay_off": "자동 재생: 꺼짐",
-    "autoplay_on": "자동 재생: 켜짐"
+    "autoplay_on": "자동 재생: 켜짐",
+    "lyrics": "가사"
   },
   "genres": {
     "pop": "팝",
@@ -308,5 +317,9 @@
     "punk": "펑크",
     "ambient": "앰비언트",
     "random": "랜덤"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ 제어 권한",
+    "music_control_requirement": "음악을 관리하려면 음악을 시작한 사람이어야 하거나, 서버 관리 권한을 가지고 있거나, DJ라는 이름의 역할을 보유해야 합니다."
   }
 }

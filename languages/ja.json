@@ -13,7 +13,9 @@
       "error": "❌ 言語を変更できませんでした！",
       "error2": "❌ コマンド処理中にエラーが発生しました！",
       "errortitle": "❌ エラー",
-      "changed_desc": "サーバーの言語が **{language}** に設定されました！"
+      "changed_desc": "サーバーの言語が **{language}** に設定されました！",
+      "permission_required": "❌ このコマンドを使用するには「サーバーを管理」権限が必要です！",
+      "permission_required_button": "❌ このボタンを使用するには「サーバーを管理」権限が必要です！"
     },
     "help": {
       "title": "🎵 音楽ボットのヘルプ",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "音量が **{volume}%** に設定されました！",
     "set_by": "👤 設定者",
     "level": "📊 レベル",
-    "volume_error": "❌ 音量を設定できませんでした！"
+    "volume_error": "❌ 音量を設定できませんでした！",
+    "not_authorized": "❌ 音楽コントロールを管理する権限がありません。"
   },
   "buttonhandler": {
     "voice_channel_required": "❌ ボイスチャンネルに参加している必要があります！",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ このボタンは無効になりました！音楽システムが再起動されました。",
     "unknown_interaction": "❌ 不明なインタラクション！",
     "processing_error": "❌ 処理中にエラーが発生しました！",
-    "not_authorized": "❌ 認証されたユーザーと音楽を開始した人のみがこのボタンを使用できます！",
+    "not_authorized": "❌ 音楽コントロールを管理する権限がありません。",
     "no_song_playing": "❌ 現在再生中の曲がありません！",
     "operation_failed": "❌ 操作が失敗しました！",
     "music_paused": "音楽が一時停止されました",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "キューが終わったらどのジャンルを再生しますか？",
     "autoplay_select_genre": "音楽ジャンルを選択...",
     "autoplay_enabled": "🎲 自動再生が有効になりました",
-    "autoplay_enabled_desc": "ジャンル: **{genre}**"
+    "autoplay_enabled_desc": "ジャンル: **{genre}**",
+    "no_lyrics_found": "この曲の歌詞が見つかりませんでした。",
+    "lyrics_unavailable": "歌詞は利用できません。",
+    "lyrics_title": "歌詞",
+    "lyrics_error": "歌詞の読み込みに失敗しました。後でもう一度お試しください。"
   },
   "musicmanager": {
     "playback_ended": "音楽が終了しました",
     "queue_empty": "すべての曲が再生されました！新しい音楽を追加するには `/play` コマンドを使用してください。",
     "playlist_added_to_queue": "✅ プレイリストから{count}曲がキューに追加されました！",
-    "track_added_to_queue": "✅ **{title}** がキューに追加されました！"
+    "track_added_to_queue": "✅ **{title}** がキューに追加されました！",
+    "control_permission_info": "🔐 コントロール：サーバー管理権限、DJロール、または音楽開始者のみ (キューボタンは公開)"
   },
   "buttons": {
     "pause": "一時停止",
@@ -285,7 +293,8 @@
     "loop_track": "ループ: トラック",
     "loop_queue": "ループ: キュー",
     "autoplay_off": "自動再生: オフ",
-    "autoplay_on": "自動再生: オン"
+    "autoplay_on": "自動再生: オン",
+    "lyrics": "歌詞"
   },
   "genres": {
     "pop": "ポップ",
@@ -308,5 +317,9 @@
     "punk": "パンク",
     "ambient": "アンビエント",
     "random": "ランダム"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ コントロール権限",
+    "music_control_requirement": "音楽を管理するには、再生を開始した本人であるか、「サーバーを管理」権限を持つか、DJという名前のロールを持っている必要があります。"
   }
 }

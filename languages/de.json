@@ -13,7 +13,9 @@
       "error": "❌ Sprache konnte nicht geändert werden!",
       "error2": "❌ Bei der Verarbeitung des Befehls ist ein Fehler aufgetreten!",
       "errortitle": "❌ Fehler",
-      "changed_desc": "Serversprache wurde auf **{language}** gesetzt!"
+      "changed_desc": "Serversprache wurde auf **{language}** gesetzt!",
+      "permission_required": "❌ Du musst die Berechtigung **Server verwalten** besitzen, um diesen Befehl zu verwenden!",
+      "permission_required_button": "❌ Du musst die Berechtigung **Server verwalten** besitzen, um diesen Button zu verwenden!"
     },
     "help": {
       "title": "🎵 Musik Bot Hilfe",
@@ -201,7 +203,8 @@
     "volume_changed_desc": "Lautstärke wurde auf **{volume}%** gesetzt!",
     "set_by": "👤 Eingestellt von",
     "level": "📊 Stufe",
-    "volume_error": "❌ Lautstärke konnte nicht eingestellt werden!"
+    "volume_error": "❌ Lautstärke konnte nicht eingestellt werden!",
+    "not_authorized": "❌ Du darfst die Musikkontrollen nicht verwalten."
   },
   "buttonhandler": {
     "voice_channel_required": "❌ Sie müssen sich in einem Sprachkanal befinden!",
@@ -210,7 +213,7 @@
     "session_invalid": "❌ Diese Schaltfläche ist nicht mehr gültig! Das Musiksystem wurde neu gestartet.",
     "unknown_interaction": "❌ Unbekannte Interaktion!",
     "processing_error": "❌ Bei der Verarbeitung ist ein Fehler aufgetreten!",
-    "not_authorized": "❌ Nur autorisierte Benutzer und die Person, die die Musik gestartet hat, können diese Schaltfläche verwenden!",
+    "not_authorized": "❌ Du darfst die Musikkontrollen nicht verwalten.",
     "no_song_playing": "❌ Derzeit wird kein Song abgespielt!",
     "operation_failed": "❌ Operation fehlgeschlagen!",
     "music_paused": "Musik Pausiert",
@@ -264,13 +267,18 @@
     "autoplay_select_desc": "Welches Genre soll abgespielt werden, wenn die Warteschlange endet?",
     "autoplay_select_genre": "Wählen Sie ein Musikgenre...",
     "autoplay_enabled": "Autoplay Aktiviert",
-    "autoplay_enabled_desc": "Autoplay für **{genre}** Genre aktiviert. Neue Songs werden automatisch hinzugefügt, wenn die Warteschlange endet."
+    "autoplay_enabled_desc": "Autoplay für **{genre}** aktiviert. Neue Songs werden automatisch zur Warteschlange hinzugefügt, wenn diese endet.",
+    "no_lyrics_found": "Keine Songtexte für diesen Song gefunden.",
+    "lyrics_unavailable": "Songtexte sind nicht verfügbar.",
+    "lyrics_title": "Songtext",
+    "lyrics_error": "Fehler beim Laden der Songtexte. Bitte versuchen Sie es später erneut."
   },
   "musicmanager": {
     "playback_ended": "Musik Beendet",
     "queue_empty": "Alle Songs wurden abgespielt! Verwenden Sie den Befehl `/play`, um neue Musik hinzuzufügen.",
     "playlist_added_to_queue": "✅ {count} Songs aus der Playlist zur Warteschlange hinzugefügt!",
-    "track_added_to_queue": "✅ **{title}** zur Warteschlange hinzugefügt!"
+    "track_added_to_queue": "✅ **{title}** zur Warteschlange hinzugefügt!",
+    "control_permission_info": "🔐 Steuerung: Nur Server verwalten Berechtigung, DJ-Rolle oder Musikstarter (Warteschlangen-Button ist öffentlich)"
   },
   "buttons": {
     "pause": "Pause",
@@ -285,7 +293,8 @@
     "loop_track": "Schleife: Titel",
     "loop_queue": "Schleife: Warteschlange",
     "autoplay_off": "Autoplay: Aus",
-    "autoplay_on": "Autoplay: An"
+    "autoplay_on": "Autoplay: An",
+    "lyrics": "Songtext"
   },
   "genres": {
     "pop": "Pop",
@@ -308,5 +317,9 @@
     "punk": "Punk",
     "ambient": "Ambient",
     "random": "Zufällig"
+  },
+  "permissions": {
+    "music_control_title": "🎛️ Steuerungsberechtigungen",
+    "music_control_requirement": "Um die Musik zu verwalten, musst du sie gestartet haben, die Berechtigung Server verwalten besitzen oder eine Rolle namens DJ haben."
   }
 }

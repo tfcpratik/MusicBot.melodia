@@ -99,6 +99,10 @@ module.exports = {
                     await this.handleAutoplay(interaction, player, requesterId);
                     break;
 
+                case 'music_lyrics':
+                    await this.handleLyrics(interaction, player);
+                    break;
+
                 default:
                     await interaction.reply({
                         content: await LanguageManager.getTranslation(guild?.id, 'buttonhandler.unknown_interaction'),
@@ -123,8 +127,8 @@ module.exports = {
     isAuthorized(interaction, requesterId) {
         const member = interaction.member;
 
-        // Admin permission check
-        if (member.permissions.has('Administrator')) return true;
+        // ManageGuild permission check (Sunucuyu Yönet)
+        if (member.permissions.has('ManageGuild')) return true;
 
         // DJ role check (if exists)
         if (member.roles.cache.some(role => role.name.toLowerCase().includes('dj'))) return true;
@@ -981,6 +985,135 @@ module.exports = {
                 embeds: [errorEmbed],
                 components: []
             });
+        }
+    },
+
+    async handleLyrics(interaction, player) {
+        const LyricsManager = require('../src/LyricsManager');
+        const guildId = interaction.guild?.id;
+
+        try {
+            if (!player.currentTrack) {
+                return await interaction.reply({
+                    content: await LanguageManager.getTranslation(guildId, 'buttonhandler.no_song_playing'),
+                    flags: [1 << 6]
+                });
+            }
+
+            if (!player.hasLyrics || !player.hasLyrics()) {
+                const noLyricsMsg = await LanguageManager.getTranslation(guildId, 'buttonhandler.no_lyrics_found') || 'No lyrics found for this song.';
+                return await interaction.reply({
+                    content: `🎤 ${noLyricsMsg}`,
+                    flags: [1 << 6]
+                });
+            }
+
+            await interaction.deferReply({ ephemeral: true });
+
+            const lyricsData = player.currentLyrics;
+            const pages = LyricsManager.formatFullLyrics(lyricsData, 4000);
+
+            if (pages.length === 0) {
+                return await interaction.editReply({
+                    content: await LanguageManager.getTranslation(guildId, 'buttonhandler.lyrics_unavailable') || 'Lyrics are unavailable.'
+                });
+            }
+
+            const lyricsTitle = await LanguageManager.getTranslation(guildId, 'buttonhandler.lyrics_title') || 'Song Lyrics';
+            
+            // If only one page, send directly
+            if (pages.length === 1) {
+                const embed = new EmbedBuilder()
+                    .setTitle(`🎤 ${lyricsTitle}`)
+                    .setDescription(`**${player.currentTrack.title}**\n${player.currentTrack.artist ? `*by ${player.currentTrack.artist}*\n` : ''}\n${pages[0]}`)
+                    .setColor(config.bot.embedColor)
+                    .setFooter({ text: `Source: ${lyricsData.source}` })
+                    .setTimestamp();
+
+                return await interaction.editReply({ embeds: [embed] });
+            }
+
+            // Multiple pages - send with pagination buttons
+            let currentPage = 0;
+
+            const createLyricsEmbed = (pageIndex) => {
+                return new EmbedBuilder()
+                    .setTitle(`🎤 ${lyricsTitle}`)
+                    .setDescription(`**${player.currentTrack.title}**\n${player.currentTrack.artist ? `*by ${player.currentTrack.artist}*\n` : ''}\n${pages[pageIndex]}`)
+                    .setColor(config.bot.embedColor)
+                    .setFooter({ text: `Source: ${lyricsData.source} | Page ${pageIndex + 1}/${pages.length}` })
+                    .setTimestamp();
+            };
+
+            const createPaginationButtons = (pageIndex) => {
+                const prevButton = new ButtonBuilder()
+                    .setCustomId('lyrics_prev')
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(pageIndex === 0);
+
+                const nextButton = new ButtonBuilder()
+                    .setCustomId('lyrics_next')
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+                    .setDisabled(pageIndex === pages.length - 1);
+
+                return new ActionRowBuilder().addComponents(prevButton, nextButton);
+            };
+
+            const message = await interaction.editReply({
+                embeds: [createLyricsEmbed(currentPage)],
+                components: [createPaginationButtons(currentPage)]
+            });
+
+            // Collector for pagination
+            const collector = message.createMessageComponentCollector({
+                time: 300000 // 5 minutes
+            });
+
+            collector.on('collect', async i => {
+                try {
+                    if (i.user.id !== interaction.user.id) {
+                        return await i.reply({
+                            content: 'These buttons are not for you!',
+                            ephemeral: true
+                        });
+                    }
+
+                    // Defer the update to prevent timeout
+                    await i.deferUpdate();
+
+                    if (i.customId === 'lyrics_prev' && currentPage > 0) {
+                        currentPage--;
+                    } else if (i.customId === 'lyrics_next' && currentPage < pages.length - 1) {
+                        currentPage++;
+                    }
+
+                    await i.editReply({
+                        embeds: [createLyricsEmbed(currentPage)],
+                        components: [createPaginationButtons(currentPage)]
+                    });
+                } catch (error) {
+                    if (error.code === 10062) {
+                        console.log('ℹ️ Interaction has expired, safely ignoring...');
+                    } else {
+                        console.error('❌ Pagination error:', error);
+                    }
+                }
+            });
+
+            collector.on('end', () => {
+                interaction.editReply({ components: [] }).catch(() => {});
+            });
+
+        } catch (error) {
+            console.error('❌ Lyrics handler error:', error);
+            const errorMsg = await LanguageManager.getTranslation(guildId, 'buttonhandler.lyrics_error') || 'Failed to load lyrics.';
+            if (interaction.deferred) {
+                await interaction.editReply({ content: errorMsg });
+            } else {
+                await interaction.reply({ content: errorMsg, ephemeral: true });
+            }
         }
     }
 };

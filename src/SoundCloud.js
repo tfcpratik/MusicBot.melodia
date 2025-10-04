@@ -80,7 +80,7 @@ class SoundCloud {
         }
     }
 
-    static async getStream(url, guildId = null) {
+    static async getStream(url, guildId = null, startSeconds = 0) {
         try {
 
 
@@ -97,7 +97,8 @@ class SoundCloud {
                 throw new Error(errorMsg);
             }
 
-
+            // Note: SoundCloud streams typically don't support seek via URL parameters
+            // Seeking will be handled by FFmpeg in MusicPlayer
             return result;
 
         } catch (error) {

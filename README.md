@@ -1,4 +1,5 @@
 <div align="center">
+
 # MusicMaker v16.0 🎶
 
 ## Project Highlights
@@ -19,6 +20,65 @@
 | Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
 | Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
 | **YouTube bot detection error** | **YouTube requires bot verification via cookies. See [YouTube Cookie Setup](#youtube-cookie-setup) below for detailed instructions.** |
+
+### YouTube Cookie Setup
+
+YouTube may occasionally block yt-dlp with a "Sign in to confirm you're not a bot" error. To fix this, you need to provide browser cookies to yt-dlp.
+
+#### Method 1: Using Browser Cookies (Recommended)
+
+1. Open your `.env` file or set environment variables
+2. Add one of the following based on your browser:
+   ```env
+   # For Chrome users
+   COOKIES_FROM_BROWSER=chrome
+   
+   # For Firefox users
+   COOKIES_FROM_BROWSER=firefox
+   
+   # For Edge users
+   COOKIES_FROM_BROWSER=edge
+   
+   # For Safari users
+   COOKIES_FROM_BROWSER=safari
+   ```
+
+3. Make sure you're logged into YouTube in that browser
+4. Restart your bot
+
+**Note:** This method automatically extracts cookies from your browser, so you need to be logged into YouTube in the specified browser.
+
+#### Method 2: Using cookies.txt File
+
+1. Install a browser extension to export cookies:
+   - **Chrome/Edge:** [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+   - **Firefox:** [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
+
+2. Go to YouTube while logged in and export cookies to a file named `cookies.txt`
+
+3. Place `cookies.txt` in your bot's root directory (same folder as `index.js`)
+
+4. Add to your `.env` file:
+   ```env
+   COOKIES_FILE=./cookies.txt
+   ```
+
+5. Restart your bot
+
+#### Verifying the Fix
+
+After setting up cookies, test with:
+```bash
+npm start
+```
+
+If you still see bot detection errors:
+- Make sure you're logged into YouTube in your browser
+- Try clearing your browser cookies and logging in again
+- Regenerate the cookies.txt file
+- Try a different browser
+
+**Security Note:** Keep your `cookies.txt` file private and never share it, as it contains your YouTube session data.
 
 ---h intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
 | 💾 Local Audio Cache | All tracks are pre-downloaded and cached locally to eliminate stream interruptions, network lag, and voice crackling—delivering buffer-free playback even during peak Discord load or ISP throttling. |
@@ -603,7 +663,6 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
-
 
 
 

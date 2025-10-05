@@ -210,11 +210,13 @@ MusicMaker uses **web scraping** by default to fetch lyrics from Genius—no API
 | ✅ No registration needed | ✅ Faster response times |
 | ⚠️ May hit rate limits on heavy use | ✅ Official API support |
 
-### YouTube Cookie Setup
+---
+
+## YouTube Cookie Setup
 
 YouTube may occasionally block yt-dlp with a "Sign in to confirm you're not a bot" error. To fix this, you need to provide browser cookies to yt-dlp.
 
-#### Method 1: Using Browser Cookies (Recommended)
+### Method 1: Using Browser Cookies (Recommended)
 
 1. Open your `.env` file or set environment variables
 2. Add one of the following based on your browser:
@@ -237,7 +239,7 @@ YouTube may occasionally block yt-dlp with a "Sign in to confirm you're not a bo
 
 **Note:** This method automatically extracts cookies from your browser, so you need to be logged into YouTube in the specified browser.
 
-#### Method 2: Using cookies.txt File
+### Method 2: Using cookies.txt File
 
 1. Install a browser extension to export cookies:
    - **Chrome/Edge:** [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
@@ -254,7 +256,7 @@ YouTube may occasionally block yt-dlp with a "Sign in to confirm you're not a bo
 
 5. Restart your bot
 
-#### Verifying the Fix
+### Verifying the Fix
 
 After setting up cookies, test with:
 ```bash
@@ -268,6 +270,8 @@ If you still see bot detection errors:
 - Try a different browser
 
 **Security Note:** Keep your `cookies.txt` file private and never share it, as it contains your YouTube session data.
+
+---
 
 ### Setup Steps
 
@@ -663,6 +667,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

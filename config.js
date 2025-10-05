@@ -56,6 +56,11 @@ module.exports = {
         filter: 'audioonly',
         quality: 'highestaudio',
         highWaterMark: 1 << 25,
+        // YouTube cookie ayarları (bot korumasını aşmak için)
+        // Kullanım: Tarayıcınızdan cookie'leri dışa aktarın ve cookies.txt dosyasına kaydedin
+        // Örnek: cookiesFromBrowser: 'chrome' veya cookiesFile: './cookies.txt'
+        cookiesFromBrowser: process.env.COOKIES_FROM_BROWSER || null, // 'chrome', 'firefox', 'edge', 'safari' gibi
+        cookiesFile: process.env.COOKIES_FILE || null, // './cookies.txt' gibi
     },
 
     // Sharding Settings (for bots in 1000+ servers)

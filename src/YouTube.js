@@ -3,6 +3,29 @@ const config = require('../config');
 const LanguageManager = require('./LanguageManager');
 
 class YouTube {
+    // yt-dlp için ortak parametreleri döndüren yardımcı fonksiyon
+    static getYtDlpOptions(extraOptions = {}) {
+        const baseOptions = {
+            noCheckCertificates: true,
+            noWarnings: true,
+            // User-Agent header ekle
+            addHeader: [
+                'referer:youtube.com',
+                'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ],
+            ...extraOptions
+        };
+
+        // Cookie ayarlarını ekle (eğer varsa)
+        if (config.ytdl.cookiesFromBrowser) {
+            baseOptions.cookiesFromBrowser = config.ytdl.cookiesFromBrowser;
+        } else if (config.ytdl.cookiesFile) {
+            baseOptions.cookies = config.ytdl.cookiesFile;
+        }
+
+        return baseOptions;
+    }
+
     static async search(query, limit = 1, guildId = null) {
         try {
 
@@ -16,12 +39,10 @@ class YouTube {
             // Use yt-dlp for YouTube search
             const searchQuery = `ytsearch${limit}:${query}`;
 
-            const results = await youtubedl(searchQuery, {
+            const results = await youtubedl(searchQuery, this.getYtDlpOptions({
                 dumpSingleJson: true,
                 flatPlaylist: true,
-                noCheckCertificates: true,
-                noWarnings: true,
-            });
+            }));
 
             if (!results || !results.entries) {
 
@@ -79,16 +100,10 @@ class YouTube {
         try {
 
 
-            const info = await youtubedl(url, {
+            const info = await youtubedl(url, this.getYtDlpOptions({
                 dumpSingleJson: true,
-                noCheckCertificates: true,
-                noWarnings: true,
                 preferFreeFormats: true,
-                addHeader: [
-                    'referer:youtube.com',
-                    'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                ]
-            });
+            }));
 
             if (!info) {
                 const errorMsg = guildId ? await LanguageManager.getTranslation(guildId, 'youtube.no_info_returned') : 'No info returned from youtube-dl';
@@ -131,12 +146,10 @@ class YouTube {
             }
 
             // Get stream URL with simple format
-            const info = await youtubedl(url, {
+            const info = await youtubedl(url, this.getYtDlpOptions({
                 dumpSingleJson: true,
                 format: 'bestaudio/best',
-                noCheckCertificates: true,
-                noWarnings: true
-            });
+            }));
 
             if (!info || !info.url) {
                 const errorMsg = guildId ? await LanguageManager.getTranslation(guildId, 'youtube.no_stream_url') : 'No stream URL found';
@@ -173,12 +186,10 @@ class YouTube {
     static async getPlaylist(url, guildId = null) {
         try {
 
-            const info = await youtubedl(url, {
+            const info = await youtubedl(url, this.getYtDlpOptions({
                 dumpSingleJson: true,
                 flatPlaylist: true,
-                noCheckCertificates: true,
-                noWarnings: true,
-            });
+            }));
 
             if (!info) {
                 const errorMsg = guildId ? await LanguageManager.getTranslation(guildId, 'youtube.no_playlist_info') : 'No playlist info found';
@@ -330,12 +341,10 @@ class YouTube {
             }
 
             // Try to get basic info to validate
-            const info = await youtubedl(url, {
+            const info = await youtubedl(url, this.getYtDlpOptions({
                 dumpSingleJson: true,
-                noCheckCertificates: true,
-                noWarnings: true,
                 skipDownload: true,
-            });
+            }));
 
             return !!info && !!info.title;
         } catch (error) {

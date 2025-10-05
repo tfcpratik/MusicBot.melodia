@@ -8,7 +8,79 @@
 | 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
 | 🪄 Smart Queue | Instant mix-ins, sequential preloading, shuffle with DJ-only guardrails, and playlist collapsing to keep channels tidy. |
 | 🔁 Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
-| 🎲 Autoplay Engine | Genre-aware autoplay with intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
+| 🎲 Autoplay Engine | Genre-aware
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| Slash commands do not appear | Ensure `CLIENT_ID` is correct and the bot logged in successfully. For new deployments, invite the bot with `applications.commands` scope. |
+| Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
+| Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
+| Buttons stop working mid-song | Interactions expire after Discord's cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
+| Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
+| Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
+| **YouTube bot detection error** | **YouTube requires bot verification via cookies. See [YouTube Cookie Setup](#youtube-cookie-setup) below for detailed instructions.** |
+
+### YouTube Cookie Setup
+
+YouTube may occasionally block yt-dlp with a "Sign in to confirm you're not a bot" error. To fix this, you need to provide browser cookies to yt-dlp.
+
+#### Method 1: Using Browser Cookies (Recommended)
+
+1. Open your `.env` file or set environment variables
+2. Add one of the following based on your browser:
+   ```env
+   # For Chrome users
+   COOKIES_FROM_BROWSER=chrome
+   
+   # For Firefox users
+   COOKIES_FROM_BROWSER=firefox
+   
+   # For Edge users
+   COOKIES_FROM_BROWSER=edge
+   
+   # For Safari users
+   COOKIES_FROM_BROWSER=safari
+   ```
+
+3. Make sure you're logged into YouTube in that browser
+4. Restart your bot
+
+**Note:** This method automatically extracts cookies from your browser, so you need to be logged into YouTube in the specified browser.
+
+#### Method 2: Using cookies.txt File
+
+1. Install a browser extension to export cookies:
+   - **Chrome/Edge:** [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+   - **Firefox:** [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/)
+
+2. Go to YouTube while logged in and export cookies to a file named `cookies.txt`
+
+3. Place `cookies.txt` in your bot's root directory (same folder as `index.js`)
+
+4. Add to your `.env` file:
+   ```env
+   COOKIES_FILE=./cookies.txt
+   ```
+
+5. Restart your bot
+
+#### Verifying the Fix
+
+After setting up cookies, test with:
+```bash
+npm start
+```
+
+If you still see bot detection errors:
+- Make sure you're logged into YouTube in your browser
+- Try clearing your browser cookies and logging in again
+- Regenerate the cookies.txt file
+- Try a different browser
+
+**Security Note:** Keep your `cookies.txt` file private and never share it, as it contains your YouTube session data.
+
+---h intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
 | 💾 Local Audio Cache | All tracks are pre-downloaded and cached locally to eliminate stream interruptions, network lag, and voice crackling—delivering buffer-free playback even during peak Discord load or ISP throttling. |
 | 🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
@@ -45,14 +117,13 @@
 4. [Quick Start](#quick-start)
 5. [Configuration](#configuration)
 6. [Spotify API Setup](#spotify-api-setup)
-7. [Genius API Setup](#genius-api-setup-optionally)
-8. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
-9. [Slash Commands & Controls](#slash-commands--controls)
-10. [Language Support](#language-support)
-11. [Deployment Tips](#deployment-tips)
-12. [Troubleshooting](#troubleshooting)
-13. [Privacy & Legal](#privacy--legal)
-14. [Contributing](#contributing)
+7. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
+8. [Slash Commands & Controls](#slash-commands--controls)
+9. [Language Support](#language-support)
+10. [Deployment Tips](#deployment-tips)
+11. [Troubleshooting](#troubleshooting)
+12. [Privacy & Legal](#privacy--legal)
+13. [Contributing](#contributing)
 
 ---
 
@@ -186,7 +257,7 @@ Without these credentials Spotify requests fall back to zero results.
 
 ---
 
-## Genius API Setup (Optionally)
+## Genius API Setup (Optional)
 
 MusicMaker uses **web scraping** by default to fetch lyrics from Genius—no API key required! However, if you want **higher rate limits** and **faster responses**, you can optionally add Genius API credentials.
 
@@ -592,7 +663,6 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
-
 
 
 

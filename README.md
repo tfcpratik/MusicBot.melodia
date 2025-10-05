@@ -58,13 +58,15 @@
 4. [Quick Start](#quick-start)
 5. [Configuration](#configuration)
 6. [Spotify API Setup](#spotify-api-setup)
-7. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
-8. [Slash Commands & Controls](#slash-commands--controls)
-9. [Language Support](#language-support)
-10. [Deployment Tips](#deployment-tips)
-11. [Troubleshooting](#troubleshooting)
-12. [Privacy & Legal](#privacy--legal)
-13. [Contributing](#contributing)
+7. [Genius API Setup (Optional)](#genius-api-setup-optional)
+8. [YT-DLP Cookie Add](#youtube-cookie-setup)
+9. [Sharding for Large Bots (1000+ Servers)](#sharding-for-large-bots-1000-servers)
+10. [Slash Commands & Controls](#slash-commands--controls)
+11. [Language Support](#language-support)
+12. [Deployment Tips](#deployment-tips)
+13. [Troubleshooting](#troubleshooting)
+14. [Privacy & Legal](#privacy--legal)
+15. [Contributing](#contributing)
 
 ---
 
@@ -670,6 +672,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

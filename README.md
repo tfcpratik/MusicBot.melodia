@@ -188,6 +188,30 @@ MusicMaker uses **web scraping** by default to fetch lyrics from Genius—no API
 | ✅ No registration needed | ✅ Faster response times |
 | ⚠️ May hit rate limits on heavy use | ✅ Official API support |
 
+### Setup Steps
+
+1. Visit the [Genius API Clients Page](https://genius.com/api-clients), sign in with your Genius account (or create one).
+2. Click **New API Client** and fill in:
+   - **App Name:** `MusicMaker Bot` (or any name)
+   - **App Website URL:** `https://localhost` (placeholder is fine)
+   - **Redirect URI:** `https://localhost/callback` (not used, but required)
+3. Click **Save** and reveal your **Client ID** and **Client Secret**.
+4. Copy both values and add them to your `.env`:
+   ```dotenv
+   GENIUS_CLIENT_ID=your_genius_client_id
+   GENIUS_CLIENT_SECRET=your_genius_client_secret
+   ```
+5. Restart the bot. The Genius client will now use API authentication.
+
+> 💡 **Note:** Even without credentials, lyrics work perfectly! The bot automatically scrapes Genius.com and falls back to LRCLIB if needed.
+
+### Lyrics Priority
+
+The bot fetches lyrics in this order:
+1. **Genius** (with API key if provided, otherwise web scraping)
+2. **LRCLIB** (free lyrics database)
+3. If both fail, no lyrics button appears
+
 ---
 
 ## YouTube Cookie Setup
@@ -248,32 +272,6 @@ If you still see bot detection errors:
 - Try a different browser
 
 **Security Note:** Keep your `cookies.txt` file private and never share it, as it contains your YouTube session data.
-
----
-
-### Setup Steps
-
-1. Visit the [Genius API Clients Page](https://genius.com/api-clients), sign in with your Genius account (or create one).
-2. Click **New API Client** and fill in:
-   - **App Name:** `MusicMaker Bot` (or any name)
-   - **App Website URL:** `https://localhost` (placeholder is fine)
-   - **Redirect URI:** `https://localhost/callback` (not used, but required)
-3. Click **Save** and reveal your **Client ID** and **Client Secret**.
-4. Copy both values and add them to your `.env`:
-   ```dotenv
-   GENIUS_CLIENT_ID=your_genius_client_id
-   GENIUS_CLIENT_SECRET=your_genius_client_secret
-   ```
-5. Restart the bot. The Genius client will now use API authentication.
-
-> 💡 **Note:** Even without credentials, lyrics work perfectly! The bot automatically scrapes Genius.com and falls back to LRCLIB if needed.
-
-### Lyrics Priority
-
-The bot fetches lyrics in this order:
-1. **Genius** (with API key if provided, otherwise web scraping)
-2. **LRCLIB** (free lyrics database)
-3. If both fail, no lyrics button appears
 
 ---
 
@@ -646,4 +644,3 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
-

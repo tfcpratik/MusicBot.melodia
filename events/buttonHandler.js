@@ -1057,28 +1057,28 @@ module.exports = {
                     .setLabel('Next ▶')
                     .setStyle(ButtonStyle.Secondary)
                     .setDisabled(pageIndex === pages.length - 1);
-
                 return new ActionRowBuilder().addComponents(prevButton, nextButton);
             };
 
-            const message = await interaction.editReply({
+            await interaction.editReply({
                 embeds: [createLyricsEmbed(currentPage)],
                 components: [createPaginationButtons(currentPage)]
             });
 
+            // Fetch the reply message for the collector
+            const message = await interaction.fetchReply();
+
             // Collector for pagination
             const collector = message.createMessageComponentCollector({
+                filter: i => i.user.id === interaction.user.id,
                 time: 300000 // 5 minutes
             });
 
             collector.on('collect', async i => {
                 try {
-                    if (i.user.id !== interaction.user.id) {
-                        return await i.reply({
-                            content: 'These buttons are not for you!',
-                            ephemeral: true
-                        }).catch(() => {});
-                    }
+                    // Log to see what's happening
+                    console.log('🔍 Button clicked:', i.customId, 'by', i.user.tag);
+                    console.log('🔍 Current page:', currentPage, 'Total pages:', pages.length);
 
                     if (i.customId === 'lyrics_prev' && currentPage > 0) {
                         currentPage--;
@@ -1086,18 +1086,29 @@ module.exports = {
                         currentPage++;
                     }
 
-                    // Use update instead of deferUpdate + editReply
-                    await i.update({
+                    console.log('🔍 New page:', currentPage);
+
+                    // Try deferUpdate first, then update
+                    if (!i.deferred && !i.replied) {
+                        await i.deferUpdate();
+                    }
+
+                    await message.edit({
                         embeds: [createLyricsEmbed(currentPage)],
                         components: [createPaginationButtons(currentPage)]
                     });
 
                 } catch (error) {
+                    console.error('❌ Pagination error details:', {
+                        code: error.code,
+                        message: error.message,
+                        deferred: i.deferred,
+                        replied: i.replied
+                    });
+                    
                     // Ignore interaction timeout/unknown interaction errors
                     if (error.code === 10062 || error.code === 10008 || error.code === 40060) {
                         console.log('ℹ️ Interaction expired or unknown, ignoring...');
-                    } else {
-                        console.error('❌ Pagination error:', error);
                     }
                 }
             });

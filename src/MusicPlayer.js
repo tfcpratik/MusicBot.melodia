@@ -352,6 +352,34 @@ class MusicPlayer {
 
     async connect() {
         try {
+            // Wait for guild's WebSocket to be ready (critical for sharding)
+            if (!this.guild.voiceAdapterCreator) {
+                // Wait up to 10 seconds for the adapter to become available
+                const maxWait = 10000;
+                const startTime = Date.now();
+                
+                while (!this.guild.voiceAdapterCreator && (Date.now() - startTime) < maxWait) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    // Try to fetch the guild again to refresh its state
+                    if (this.guild.client) {
+                        try {
+                            const freshGuild = await this.guild.client.guilds.fetch(this.guild.id);
+                            if (freshGuild && freshGuild.voiceAdapterCreator) {
+                                // Update our guild reference
+                                Object.assign(this.guild, freshGuild);
+                                break;
+                            }
+                        } catch (e) {
+                            // Ignore fetch errors
+                        }
+                    }
+                }
+                
+                if (!this.guild.voiceAdapterCreator) {
+                    throw new Error('Guild voice adapter not ready after waiting');
+                }
+            }
+
             this.connection = joinVoiceChannel({
                 channelId: this.voiceChannel.id,
                 guildId: this.guild.id,
@@ -367,8 +395,8 @@ class MusicPlayer {
             await entersState(this.connection, VoiceConnectionStatus.Ready, 30000);
             return true;
         } catch (error) {
-            console.error('❌ Failed to connect to voice channel:', error);
-            return false;
+            console.error('❌ Failed to connect to voice channel:', error.message);
+            throw error; // Re-throw so restoreFromState can handle it
         }
     }
 
@@ -402,7 +430,7 @@ class MusicPlayer {
     }
 
     disconnect() {
-        if (this.connection && this.connection.state.status !== 'destroyed') {
+        if (this.connection && this.connection.state && this.connection.state.status !== 'destroyed') {
             try {
                 this.connection.destroy();
             } catch (error) {
@@ -949,6 +977,8 @@ class MusicPlayer {
             
             // File playback mode (either pre-downloaded or fallback from streaming)
             if (!shouldDownload && downloadedFile) {
+                console.log(`🎵 Playing from cached file: ${path.basename(downloadedFile)} (seek: ${resumeFromMs}ms)`);
+                
                 const seekArgs = resumeFromMs > 0 
                     ? ['-ss', (resumeFromMs / 1000).toFixed(3)] 
                     : [];
@@ -977,10 +1007,15 @@ class MusicPlayer {
                     metadata: {
                         title: this.currentTrack.title,
                         url: this.currentTrack.url,
-                        duration: streamInfo.duration || this.currentTrack.duration,
-                        bitrate: streamInfo.bitrate || 128
+                        duration: (streamInfo && streamInfo.duration) || this.currentTrack.duration,
+                        bitrate: (streamInfo && streamInfo.bitrate) || 128
                     }
                 });
+            }
+
+            // Ensure we have a resource
+            if (!this.resource) {
+                throw new Error('Failed to create audio resource');
             }
 
             // Set volume
@@ -993,10 +1028,13 @@ class MusicPlayer {
                 this.currentTrack.duration = streamInfo.duration;
             }
 
+            console.log(`▶️  Playing: ${this.currentTrack.title} (${this.currentTrack.duration}s, offset: ${resumeFromMs}ms)`);
+
             // Play the resource
             this.audioPlayer.play(this.resource);
 
             if (this.pauseReasons.size > 0) {
+                console.log(`⏸️  Paused due to: ${Array.from(this.pauseReasons).join(', ')}`);
                 this.audioPlayer.pause();
             }
 
@@ -1050,9 +1088,16 @@ class MusicPlayer {
         const trackDuration = this.currentTrack && Number(this.currentTrack.duration) > 0 ? Number(this.currentTrack.duration) : null;
         const durationSeconds = streamDuration || trackDuration;
 
-        if (durationSeconds) {
-            this.expectedTrackEndTs = Date.now() + durationSeconds * 1000;
-            const timeoutMs = Math.max(durationSeconds * 1000 + 4000, 5000);
+        if (durationSeconds && durationSeconds > 0) {
+            // Calculate remaining time considering the start offset (in seconds)
+            const startOffsetSeconds = Math.floor((this.currentTrackStartOffsetMs || 0) / 1000);
+            const remainingSeconds = Math.max(1, durationSeconds - startOffsetSeconds);
+            
+            this.expectedTrackEndTs = Date.now() + (remainingSeconds * 1000);
+            // Add 4 seconds buffer, but ensure minimum 5 seconds timeout
+            const timeoutMs = Math.max(remainingSeconds * 1000 + 4000, 5000);
+            
+            console.log(`🕒 Track watchdog: ${remainingSeconds}s remaining (${durationSeconds}s total, ${startOffsetSeconds}s offset)`);
             this.trackTimer = setTimeout(() => this.ensureTrackCompletion(), timeoutMs);
         } else {
             // Fallback watchdog: check every 5 minutes for streams without known duration
@@ -1262,7 +1307,7 @@ class MusicPlayer {
                     }
                 }
             }
-        }, this.inactivityTimeoutMs);
+        }, Math.max(this.inactivityTimeoutMs, 0));
     }
 
     clearInactivityTimer(shouldResume = true) {
@@ -1956,8 +2001,10 @@ class MusicPlayer {
         for (const file of state.downloadedFiles || []) {
             if (!file) continue;
             try {
-                if (fsSync.existsSync(file)) {
-                    validDownloads.add(path.resolve(file));
+                // Resolve relative paths against CACHE_DIR
+                const fullPath = path.isAbsolute(file) ? file : path.join(CACHE_DIR, file);
+                if (fsSync.existsSync(fullPath)) {
+                    validDownloads.add(path.resolve(fullPath));
                 } else {
                     console.log(`❌ Missing cached file: ${path.basename(file)}`);
                 }
@@ -1967,8 +2014,13 @@ class MusicPlayer {
         }
         this.downloadedFiles = validDownloads;
 
-        if (state.currentDownloadedFile && fsSync.existsSync(state.currentDownloadedFile)) {
-            this.currentDownloadedFile = path.resolve(state.currentDownloadedFile);
+        if (state.currentDownloadedFile) {
+            const fullPath = path.isAbsolute(state.currentDownloadedFile) ? state.currentDownloadedFile : path.join(CACHE_DIR, state.currentDownloadedFile);
+            if (fsSync.existsSync(fullPath)) {
+                this.currentDownloadedFile = path.resolve(fullPath);
+            } else {
+                this.currentDownloadedFile = null;
+            }
          } else {
             this.currentDownloadedFile = null;
          }
@@ -1985,8 +2037,13 @@ class MusicPlayer {
         this.paused = false;
 
         if (!this.connection) {
-            const connected = await this.connect();
-            if (!connected) {
+            try {
+                const connected = await this.connect();
+                if (!connected) {
+                    throw new Error('Failed to reconnect to voice channel');
+                }
+            } catch (error) {
+                console.error('❌ Failed to connect during restore:', error.message);
                 throw new Error('Failed to reconnect to voice channel');
             }
         }
@@ -2194,7 +2251,7 @@ class MusicPlayer {
             // Disconnect from voice channel
             if (this.connection) {
                 this.connection.removeAllListeners();
-                if (this.connection.state.status !== 'destroyed') {
+                if (this.connection.state && this.connection.state.status !== 'destroyed') {
                     try {
                         this.connection.destroy();
                     } catch (error) {
@@ -2252,15 +2309,15 @@ class MusicPlayer {
     getStatus() {
         return {
             connected: !!this.connection,
-            playing: this.audioPlayer.state.status === AudioPlayerStatus.Playing,
-            paused: this.audioPlayer.state.status === AudioPlayerStatus.Paused,
+            playing: this.audioPlayer?.state?.status === AudioPlayerStatus.Playing,
+            paused: this.audioPlayer?.state?.status === AudioPlayerStatus.Paused,
             queue: this.queue.length,
             volume: this.volume,
             loop: this.loop,
             shuffle: this.shuffle,
             currentTrack: this.currentTrack,
-            voiceChannel: this.voiceChannel.name,
-            textChannel: this.textChannel.name,
+            voiceChannel: this.voiceChannel?.name,
+            textChannel: this.textChannel?.name,
         };
     }
 

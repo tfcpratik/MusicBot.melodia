@@ -87,8 +87,27 @@ manager.spawn({
     amount: config.sharding?.totalShards || 'auto',
     delay: config.sharding?.spawnDelay || 5500, // Delay between shard spawns (Discord recommends 5-5.5 seconds)
     timeout: config.sharding?.spawnTimeout || 30000, // Timeout for shard ready
-}).then(shards => {
+}).then(async shards => {
     console.log(chalk.green(`\n✅ Successfully spawned ${shards.size} shard(s)`));
+    
+    // Wait a bit for all shards to be fully ready, then restore sessions
+    console.log(chalk.cyan('\n⏳ Waiting for all shards to stabilize before restoring sessions...'));
+    await new Promise(resolve => setTimeout(resolve, 10000)); // 10 second wait
+    
+    console.log(chalk.cyan('🔄 Broadcasting session restore to all shards...'));
+    
+    // Broadcast restore command to all shards
+    await manager.broadcastEval(async (client) => {
+        // Only restore if this function exists
+        if (typeof client.restoreSessions === 'function') {
+            await client.restoreSessions();
+        }
+    }).catch(err => {
+        console.error(chalk.red('❌ Error broadcasting restore:'), err.message);
+    });
+    
+    console.log(chalk.green('✅ Session restore broadcast complete'));
+    
 }).catch(error => {
     console.error(chalk.red('❌ Failed to spawn shards:'), error);
     process.exit(1);

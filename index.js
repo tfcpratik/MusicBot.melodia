@@ -50,10 +50,29 @@ async function restoreSavedPlayers(client) {
     const entries = Object.entries(savedStates || {});
     if (entries.length === 0) return;
 
+    console.log(chalk.cyan(`🔄 Found ${entries.length} saved session(s) to restore...`));
+
     for (const [guildId, state] of entries) {
         try {
-            const guild = client.guilds.cache.get(guildId) || await client.guilds.fetch(guildId).catch(() => null);
+            // Wait for guild to be available in cache
+            let guild = client.guilds.cache.get(guildId);
+            
             if (!guild) {
+                // Try fetching with retry logic for sharding
+                let retries = 3;
+                while (!guild && retries > 0) {
+                    try {
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                        guild = await client.guilds.fetch(guildId).catch(() => null);
+                        if (guild) break;
+                    } catch (error) {
+                        retries--;
+                    }
+                }
+            }
+
+            if (!guild) {
+                console.log(chalk.yellow(`⚠️ Guild ${guildId} not found or not accessible, removing state...`));
                 await PlayerStateManager.removeState(guildId);
                 continue;
             }
@@ -80,6 +99,7 @@ async function restoreSavedPlayers(client) {
             const isTextValid = textChannel && typeof textChannel.isTextBased === 'function' && textChannel.isTextBased();
 
             if (!isVoiceValid || !isTextValid) {
+                console.log(chalk.yellow(`⚠️ Invalid channels for guild ${guild.name}, removing state...`));
                 await PlayerStateManager.removeState(guildId);
                 continue;
             }
@@ -89,14 +109,15 @@ async function restoreSavedPlayers(client) {
 
             try {
                 await player.restoreFromState(state);
+                console.log(chalk.green(`✅ Successfully restored session for guild ${guild.name}`));
             } catch (error) {
-                console.error(chalk.red(`❌ Failed to restore music session for guild ${guild.name} (${guildId}):`), error);
+                console.error(chalk.red(`❌ Failed to restore music session for guild ${guild.name} (${guildId}):`), error.message);
                 client.players.delete(guildId);
                 player.cleanup();
                 await PlayerStateManager.removeState(guildId);
             }
         } catch (error) {
-            console.error(chalk.red(`❌ Error during session restoration for guild ${guildId}:`), error);
+            console.error(chalk.red(`❌ Error during session restoration for guild ${guildId}:`), error.message);
             await PlayerStateManager.removeState(guildId);
         }
     }
@@ -210,10 +231,22 @@ setTimeout(() => {
         // Set bot activity
         setInterval(() => client.user.setActivity({ name: `${config.bot.status}`, type: ActivityType.Listening }), 10000);
 
-        // FIRST restore players (this populates protected files), THEN cleanup cache
+        // Don't restore here in sharded mode - wait for shard manager to broadcast
+        // For non-sharded mode, restore immediately
+        if (!client.shard) {
+            console.log(chalk.cyan('⏳ Non-sharded mode: waiting for guilds to be fully cached...'));
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            await client.restoreSessions();
+        }
+    });
+
+    // Add restore function to client for shard manager to call
+    client.restoreSessions = async function() {
+        console.log(chalk.cyan(`[SHARD ${client.shard?.ids?.[0] ?? 'N/A'}] 🔄 Starting session restore...`));
         await restoreSavedPlayers(client);
         await cleanupAudioCache();
-    });
+        console.log(chalk.green(`[SHARD ${client.shard?.ids?.[0] ?? 'N/A'}] ✅ Session restore complete`));
+    };
 
     // Handle interactions (slash commands)
     client.on(Events.InteractionCreate, async interaction => {

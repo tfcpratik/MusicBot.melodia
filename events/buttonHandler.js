@@ -1077,11 +1077,8 @@ module.exports = {
                         return await i.reply({
                             content: 'These buttons are not for you!',
                             ephemeral: true
-                        });
+                        }).catch(() => {});
                     }
-
-                    // Defer the update to prevent timeout
-                    await i.deferUpdate();
 
                     if (i.customId === 'lyrics_prev' && currentPage > 0) {
                         currentPage--;
@@ -1089,13 +1086,16 @@ module.exports = {
                         currentPage++;
                     }
 
-                    await i.editReply({
+                    // Use update instead of deferUpdate + editReply
+                    await i.update({
                         embeds: [createLyricsEmbed(currentPage)],
                         components: [createPaginationButtons(currentPage)]
                     });
+
                 } catch (error) {
-                    if (error.code === 10062) {
-                        console.log('ℹ️ Interaction has expired, safely ignoring...');
+                    // Ignore interaction timeout/unknown interaction errors
+                    if (error.code === 10062 || error.code === 10008 || error.code === 40060) {
+                        console.log('ℹ️ Interaction expired or unknown, ignoring...');
                     } else {
                         console.error('❌ Pagination error:', error);
                     }

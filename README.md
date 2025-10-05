@@ -182,7 +182,7 @@ COOKIES_FILE=./cookies.txt
 | `bot.supportServer` & `bot.website` | `.env`/`config.js` | Populates help links and README badges. |
 | `spotify.clientId` & `spotify.clientSecret` | `.env`/`config.js` | Enables Spotify search, playlist and album expansion. |
 | `genius.clientId` & `genius.clientSecret` | `.env`/`config.js` | Optional Genius API credentials for higher rate limits (works without via web scraping). |
-| `ytdl.cookiesFromBrowser & `ytdl.cookiesFile | `.env`/config.js` | It is an optional feature to add cookies against YouTube cookie errors. |
+| `ytdl.cookiesFromBrowser & `ytdl.cookiesFile` | `.env`/`config.js` | It is an optional feature to add cookies against YouTube cookie errors. |
 
 > 🔐 Never commit `.env` to source control. Use deployment secrets in your hosting provider or create environment variables at runtime.
 
@@ -670,6 +670,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

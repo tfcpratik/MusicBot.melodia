@@ -2,6 +2,13 @@
 
 # MusicMaker v16.0 🎶
 
+![GitHub Stars](https://img.shields.io/github/stars/umutxyp/musicbot?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/umutxyp/musicbot?style=social)
+![GitHub Issues](https://img.shields.io/github/issues/umutxyp/musicbot)
+![GitHub License](https://img.shields.io/github/license/umutxyp/musicbot)
+
+[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me)
+
 ## Project Highlights
 | Capability | Details |
 | --- | --- |
@@ -14,13 +21,6 @@
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
 | 📜 Static Lyrics | Fetches lyrics from Genius (web scraping) with LRCLIB fallback—button-only display with pagination support. |
 | ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |generation Discord music bot crafted with **discord.js v14**, engineered for cinematic embeds, lossless playback, and frictionless control across desktop and mobile.
-
-![GitHub Stars](https://img.shields.io/github/stars/umutxyp/musicbot?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/umutxyp/musicbot?style=social)
-![GitHub Issues](https://img.shields.io/github/issues/umutxyp/musicbot)
-![GitHub License](https://img.shields.io/github/license/umutxyp/musicbot)
-
-[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me)
 
 </div>
 
@@ -673,6 +673,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

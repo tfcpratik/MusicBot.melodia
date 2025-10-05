@@ -1,5 +1,3 @@
-<div align="center">
-
 # MusicMaker v16.0 🎶
 
 ## Project Highlights
@@ -93,8 +91,6 @@ If you still see bot detection errors:
 ![GitHub License](https://img.shields.io/github/license/umutxyp/musicbot)
 
 [Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me)
-
-</div>
 
 ---
 
@@ -663,6 +659,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

@@ -1,130 +1,130 @@
-# YouTube Bot Algılama Hatası Çözümü
+# YouTube Bot Detection Error Fix
 
-## Sorun Nedir?
+## What's the Problem?
 
-Bazı kullanıcılarda şu hata mesajını görebilirsiniz:
+Some users may encounter this error message:
 
 ```
 ERROR: [youtube] Sign in to confirm you're not a bot. 
 Use --cookies-from-browser or --cookies for the authentication.
 ```
 
-Bu hata, YouTube'un bot koruması nedeniyle yt-dlp'nin engellemesidir. YouTube, yoğun kullanımlarda veya belirli IP'lerden gelen istekleri bot olarak algılayabilir ve cookie doğrulaması isteyebilir.
+This error occurs due to YouTube's bot protection blocking yt-dlp. YouTube may detect requests from certain IPs or during heavy usage as bot activity and require cookie authentication.
 
-## Çözüm Yöntemleri
+## Solution Methods
 
-### Yöntem 1: Tarayıcı Cookie'lerini Kullanma (Önerilen)
+### Method 1: Using Browser Cookies (Recommended)
 
-Bu yöntem en kolay ve otomatik güncellenen çözümdür.
+This is the easiest method with automatic updates.
 
-1. `.env` dosyanızı açın
-2. Kullandığınız tarayıcıya göre aşağıdaki satırlardan birini ekleyin:
+1. Open your `.env` file
+2. Add one of the following lines based on your browser:
 
 ```env
-# Chrome kullanıyorsanız
+# If you use Chrome
 COOKIES_FROM_BROWSER=chrome
 
-# Firefox kullanıyorsanız
+# If you use Firefox
 COOKIES_FROM_BROWSER=firefox
 
-# Edge kullanıyorsanız
+# If you use Edge
 COOKIES_FROM_BROWSER=edge
 
-# Safari kullanıyorsanız (Mac)
+# If you use Safari (Mac)
 COOKIES_FROM_BROWSER=safari
 ```
 
-3. Belirttiğiniz tarayıcıda YouTube'a giriş yapmış olduğunuzdan emin olun
-4. Botu yeniden başlatın
+3. Make sure you're logged into YouTube in the specified browser
+4. Restart the bot
 
-**Önemli:** Bu yöntemde belirttiğiniz tarayıcıda YouTube'a giriş yapmış olmanız gerekir. Bot, tarayıcınızdan otomatik olarak cookie'leri alacaktır.
+**Important:** For this method, you need to be logged into YouTube in the specified browser. The bot will automatically extract cookies from your browser.
 
-### Yöntem 2: cookies.txt Dosyası Kullanma
+### Method 2: Using cookies.txt File
 
-Bu yöntem daha manuel ama bazı durumlarda daha güvenilir olabilir.
+This method is more manual but can be more reliable in some cases.
 
-#### Adım 1: Cookie Dışa Aktarma Eklentisi Kurun
+#### Step 1: Install Cookie Export Extension
 
-**Chrome/Edge için:**
-1. [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) eklentisini kurun
+**For Chrome/Edge:**
+1. Install [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc) extension
 
-**Firefox için:**
-1. [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/) eklentisini kurun
+**For Firefox:**
+1. Install [cookies.txt](https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/) extension
 
-#### Adım 2: Cookie'leri Dışa Aktarın
+#### Step 2: Export Cookies
 
-1. YouTube'a giriş yapın (herhangi bir Google hesabıyla)
-2. YouTube.com sayfasındayken eklentiye tıklayın
-3. "Export" veya "Download" butonuna tıklayın
-4. `cookies.txt` dosyasını indirin
+1. Log in to YouTube (with any Google account)
+2. While on YouTube.com, click the extension
+3. Click "Export" or "Download" button
+4. Download the `cookies.txt` file
 
-#### Adım 3: Dosyayı Botun Klasörüne Koyun
+#### Step 3: Place File in Bot Folder
 
-1. İndirdiğiniz `cookies.txt` dosyasını botun ana klasörüne kopyalayın (index.js dosyasının olduğu yer)
+1. Copy the downloaded `cookies.txt` file to the bot's root directory (where index.js is located)
 
-#### Adım 4: .env Dosyasını Güncelleyin
+#### Step 4: Update .env File
 
-`.env` dosyanıza şunu ekleyin:
+Add this to your `.env` file:
 
 ```env
 COOKIES_FILE=./cookies.txt
 ```
 
-#### Adım 5: Botu Yeniden Başlatın
+#### Step 5: Restart the Bot
 
 ```bash
 npm start
 ```
 
-## Hangi Yöntemi Kullanmalıyım?
+## Which Method Should I Use?
 
-| Yöntem | Avantajlar | Dezavantajlar |
+| Method | Advantages | Disadvantages |
 |--------|-----------|---------------|
-| **Tarayıcı Cookie'leri (Yöntem 1)** | ✅ Otomatik güncellenir<br>✅ Kurulumu kolay<br>✅ Dosya yönetimi gerektirmez | ❌ Tarayıcıda giriş yapmış olmalısınız<br>❌ Tarayıcı kapandığında sorun olabilir |
-| **cookies.txt (Yöntem 2)** | ✅ Daha güvenilir<br>✅ Sunucularda kullanılabilir<br>✅ Tarayıcı açık olmasa da çalışır | ❌ Manuel güncelleme gerekir<br>❌ Cookie'ler zaman aşımına uğrayabilir (yenilemeniz gerekir) |
+| **Browser Cookies (Method 1)** | ✅ Auto-updates<br>✅ Easy setup<br>✅ No file management | ❌ Must be logged in browser<br>❌ May have issues when browser is closed |
+| **cookies.txt (Method 2)** | ✅ More reliable<br>✅ Works on servers<br>✅ Works even if browser is closed | ❌ Requires manual updates<br>❌ Cookies may expire (need regeneration) |
 
-### Öneriler:
+### Recommendations:
 
-- **Kişisel bilgisayarda çalıştırıyorsanız:** Yöntem 1 (Tarayıcı Cookie'leri)
-- **VPS/Sunucuda çalıştırıyorsanız:** Yöntem 2 (cookies.txt dosyası)
+- **Running on personal computer:** Method 1 (Browser Cookies)
+- **Running on VPS/Server:** Method 2 (cookies.txt file)
 
-## Doğrulama
+## Verification
 
-Kurulumu tamamladıktan sonra botu test edin:
+After completing the setup, test your bot:
 
 ```bash
 npm start
 ```
 
-Ardından Discord'da bir müzik çalmayı deneyin:
+Then try playing music in Discord:
 ```
 /play Despacito
 ```
 
-## Sorun Devam Ediyorsa
+## If the Problem Persists
 
-Eğer hata devam ederse:
+If the error continues:
 
-1. ✅ YouTube'a giriş yaptığınızdan emin olun
-2. ✅ Tarayıcı cookie'lerini temizleyip tekrar giriş yapın
-3. ✅ Farklı bir tarayıcı deneyin
-4. ✅ cookies.txt dosyasını yeniden oluşturun
-5. ✅ Botu tamamen kapatıp yeniden başlatın
+1. ✅ Make sure you're logged into YouTube
+2. ✅ Clear browser cookies and log in again
+3. ✅ Try a different browser
+4. ✅ Regenerate the cookies.txt file
+5. ✅ Completely stop and restart the bot
 
-## Güvenlik Notu
+## Security Note
 
-⚠️ **ÖNEMLİ:** 
-- `cookies.txt` dosyanız YouTube oturum bilgilerinizi içerir
-- Bu dosyayı kimseyle paylaşmayın
-- `.gitignore` dosyasına `cookies.txt` eklenmiş olduğundan emin olun
-- Dosyayı GitHub'a yüklemeyin
+⚠️ **IMPORTANT:** 
+- Your `cookies.txt` file contains your YouTube session data
+- Never share this file with anyone
+- Make sure `cookies.txt` is added to `.gitignore`
+- Do not upload the file to GitHub
 
-## Yardım
+## Help
 
-Sorunuz devam ediyorsa:
-- [Discord Destek Sunucusu](https://discord.gg/ACJQzJuckW) - Canlı destek
-- [GitHub Issues](https://github.com/umutxyp/musicbot/issues) - Hata bildirimi
+If your issue persists:
+- [Discord Support Server](https://discord.gg/ACJQzJuckW) - Live support
+- [GitHub Issues](https://github.com/umutxyp/musicbot/issues) - Bug reports
 
 ---
 
-**Not:** Cookie'ler periyodik olarak süresi dolabilir (genelde 1-2 ay). Hatayı tekrar görürseniz, cookie'leri yeniden dışa aktarmanız gerekebilir.
+**Note:** Cookies may expire periodically (usually 1-2 months). If you see the error again, you may need to re-export the cookies.

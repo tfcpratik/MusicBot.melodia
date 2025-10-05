@@ -57,20 +57,6 @@
 
 ---
 
-## Project Highlights
-
-| Capability | Details |
-| --- | --- |
-| 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
-| 🪄 Smart Queue | Instant mix-ins, sequential preloading, shuffle with DJ-only guardrails, and playlist collapsing to keep channels tidy. |
-| � Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
-| �🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
-| 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
-| 📜 Static Lyrics | Genius API integration with automatic web scraping fallback, LRCLIB as secondary source—all lyrics displayed via button with pagination. |
-| ⚙️ Extensible Core | Modular providers (`src/YouTube.js`, `src/Spotify.js`, `src/SoundCloud.js`, `src/DirectLink.js`) let you add more sources quickly. |
-
----
-
 ## Folder Anatomy
 
 ```
@@ -673,6 +659,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

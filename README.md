@@ -8,20 +8,7 @@
 | 🎛️ Dynamic Embeds | Auto-refreshing "Now Playing" cards with cover art, platform badges, queue countdowns, and localized metadata. |
 | 🪄 Smart Queue | Instant mix-ins, sequential preloading, shuffle with DJ-only guardrails, and playlist collapsing to keep channels tidy. |
 | 🔁 Loop Modes | Three-way loop toggle: Off, Track Repeat (endless current song), or Queue Repeat (restart queue when finished). |
-| 🎲 Autoplay Engine | Genre-aware
-## Troubleshooting
-
-| Symptom | Fix |
-| --- | --- |
-| Slash commands do not appear | Ensure `CLIENT_ID` is correct and the bot logged in successfully. For new deployments, invite the bot with `applications.commands` scope. |
-| Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
-| Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
-| Buttons stop working mid-song | Interactions expire after Discord's cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
-| Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
-| Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
-| **YouTube bot detection error** | **YouTube requires bot verification via cookies. See [YouTube Cookie Setup](#youtube-cookie-setup) below for detailed instructions.** |
-
----h intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
+| 🎲 Autoplay Engine | Genre-aware autoplay with intelligent filtering—select from 20 genres (Pop, Rock, Hip-Hop, Anime, Lo-Fi, etc.) and the bot automatically queues matching music when your queue ends, filtering out tutorials, podcasts, and non-music content with smart duration and keyword detection. |
 | 💾 Local Audio Cache | All tracks are pre-downloaded and cached locally to eliminate stream interruptions, network lag, and voice crackling—delivering buffer-free playback even during peak Discord load or ISP throttling. |
 | 🛡️ Resilient Playback | Voice connection watchdog, stream retry logic, idle auto-disconnect, and graceful SIGINT shutdown. |
 | 🧠 Localization | Cached translations via `node-json-db` with runtime language switching and fallback logic. |
@@ -652,6 +639,20 @@ Add your own by copying `languages/en.json`, translating strings, and restarting
 
 ---
 
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| Slash commands do not appear | Ensure `CLIENT_ID` is correct and the bot logged in successfully. For new deployments, invite the bot with `applications.commands` scope. |
+| Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
+| Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
+| Buttons stop working mid-song | Interactions expire after Discord's cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
+| Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
+| Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
+| **YouTube bot detection error** | **YouTube requires bot verification via cookies. See [YouTube Cookie Setup](#youtube-cookie-setup) below for detailed instructions.** |
+
+---
+
 ## Privacy & Legal
 
 - [Privacy Policy](./PRIVACY_POLICY.md) – Exactly what data we store (guild ID + language preference) and how to request deletion.
@@ -672,6 +673,7 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+
 
 
 

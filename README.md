@@ -619,19 +619,6 @@ Add your own by copying `languages/en.json`, translating strings, and restarting
 | Slash commands do not appear | Ensure `CLIENT_ID` is correct and the bot logged in successfully. For new deployments, invite the bot with `applications.commands` scope. |
 | Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
 | Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
-| Buttons stop working mid-song | Interactions expire after Discord’s cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
-| Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
-| Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
-
----
-
-## Troubleshooting
-
-| Symptom | Fix |
-| --- | --- |
-| Slash commands do not appear | Ensure `CLIENT_ID` is correct and the bot logged in successfully. For new deployments, invite the bot with `applications.commands` scope. |
-| Spotify tracks return nothing | Verify `SPOTIFY_CLIENT_ID`/`SECRET` and that the app is approved for Spotify Web API. |
-| Bot joins but plays silence | Confirm the host has outbound UDP open, and the voice channel permissions allow **Connect** and **Speak**. |
 | Buttons stop working mid-song | Interactions expire after Discord's cache TTL or when a new session is generated. Use `/play` again to refresh the deck. |
 | Lyrics button disabled or missing | The bot fetches from Genius first (web scraping or API), then LRCLIB. If both fail, no lyrics button appears. Check console for fetch errors. |
 | Command language incorrect | Run `/language`, select your flag, and ensure `database/languages.json` is writable. |
@@ -659,3 +646,4 @@ Bug reports, feature ideas, and localization pull requests are all welcome. Swin
 ---
 
 Happy streaming, and keep the servers grooving! 🎧
+

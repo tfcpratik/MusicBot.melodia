@@ -7,7 +7,7 @@
 ![GitHub Issues](https://img.shields.io/github/issues/umutxyp/musicbot)
 ![GitHub License](https://img.shields.io/github/license/umutxyp/musicbot)
 
-[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [Website](https://musicmaker.vercel.app) • [CodeShare](https://codeshare.me)
+[Invite the public MusicMaker bot](https://discord.com/oauth2/authorize?client_id=774043716797071371&permissions=277028620608&scope=applications.commands%20bot) • [Support Server](https://discord.gg/ACJQzJuckW) • [MusicMaker Web Dashboard](https://music-maker.app) • [CodeShare](https://codeshare.me)
 
 ## Project Highlights
 | Capability | Details |
@@ -642,5 +642,6 @@ Add your own by copying `languages/en.json`, translating strings, and restarting
 Bug reports, feature ideas, and localization pull requests are all welcome. Swing by the [Support Server](https://discord.gg/ACJQzJuckW) to chat with the community.
 
 ---
+
 
 Happy streaming, and keep the servers grooving! 🎧
